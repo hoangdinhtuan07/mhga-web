@@ -8,6 +8,8 @@ import {
 } from "./registration-overview-table";
 import type { StoreDef } from "./assignment-table";
 import { Step3Content } from "./step3-content";
+import { SuggestionStep } from "./suggestion-step";
+import { DraftScheduleGrid } from "./draft-schedule-grid";
 import type { ScheduleAssignment, ShiftDef } from "@/lib/schedule/assignment";
 
 const STEPS = [
@@ -25,6 +27,7 @@ export function ScheduleWizard({
   stores,
   shifts,
   assignments,
+  isPublished,
 }: {
   weekStart: string;
   weekLabel: string;
@@ -33,6 +36,7 @@ export function ScheduleWizard({
   stores: StoreDef[];
   shifts: ShiftDef[];
   assignments: ScheduleAssignment[];
+  isPublished: boolean;
 }) {
   const [step, setStep] = useState(1);
 
@@ -41,6 +45,14 @@ export function ScheduleWizard({
       <h1 className="text-xl font-semibold">
         Đăng ký lịch làm việc — tuần {weekLabel}
       </h1>
+
+      {isPublished && (
+        <p className="rounded-md border border-primary/30 bg-primary/10 p-3 text-sm">
+          ✓ Lịch tuần {weekLabel} đã được công bố — nhân viên đã thấy lịch
+          này trên trang chủ. Các bảng nháp bên dưới trống vì mọi ca đã
+          chuyển sang chính thức, không phải bị xoá.
+        </p>
+      )}
 
       <div className="grid grid-cols-4 gap-2">
         {STEPS.map((s) => (
@@ -68,6 +80,14 @@ export function ScheduleWizard({
       {step === 1 && (
         <RegistrationOverviewTable weekDays={weekDays} employees={employees} />
       )}
+      {step === 2 && (
+        <SuggestionStep
+          weekStart={weekStart}
+          weekLabel={weekLabel}
+          stores={stores}
+          assignments={assignments}
+        />
+      )}
       {step === 3 && (
         <Step3Content
           weekStart={weekStart}
@@ -78,10 +98,16 @@ export function ScheduleWizard({
           employees={employees}
         />
       )}
-      {(step === 2 || step === 4) && (
-        <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-          Bước này sẽ được xây ở phần tiếp theo của lộ trình.
-        </div>
+      {step === 4 && (
+        <DraftScheduleGrid
+          weekStart={weekStart}
+          weekLabel={weekLabel}
+          weekDays={weekDays}
+          stores={stores}
+          assignments={assignments}
+          employees={employees}
+          isPublished={isPublished}
+        />
       )}
     </div>
   );

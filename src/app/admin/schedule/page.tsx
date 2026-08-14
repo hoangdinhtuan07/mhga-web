@@ -14,6 +14,11 @@ import { ScheduleWizard } from "./schedule-wizard";
 import type { EmployeeRegistration } from "./registration-overview-table";
 import type { StoreDef } from "./assignment-table";
 
+// runSuggestion (Bước 2) có thể chạy tới ~15-20s ở quy mô 25 người (bộ giải
+// JS thuần không tuân thủ timeout nội bộ chặt chẽ) — nới trần thời gian
+// chạy Server Action trên Vercel qua route segment config của trang gọi nó.
+export const maxDuration = 30;
+
 export default async function AdminSchedulePage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/");
@@ -33,6 +38,7 @@ export default async function AdminSchedulePage() {
     { data: storesData },
     { data: shiftsData },
     { data: scheduleRows },
+    { data: publishedRows },
   ] = await Promise.all([
     supabase
       .from("users")
@@ -52,7 +58,17 @@ export default async function AdminSchedulePage() {
       )
       .eq("week_start", weekStart)
       .eq("status", "draft"),
+    supabase
+      .from("schedule")
+      .select("id")
+      .eq("week_start", weekStart)
+      .eq("status", "published")
+      .limit(1),
   ]);
+
+  // Đã công bố thì bảng nháp trống trơn (mọi ca đã chuyển sang published) —
+  // cần cờ riêng để giao diện báo rõ lý do thay vì trông như bị xoá sạch.
+  const isPublished = (publishedRows ?? []).length > 0;
 
   const employees: EmployeeRegistration[] = (users ?? []).map((u) => {
     const selections: Record<string, DaySelection> = {};
@@ -99,6 +115,7 @@ export default async function AdminSchedulePage() {
         stores={stores}
         shifts={shifts}
         assignments={assignments}
+        isPublished={isPublished}
       />
     </main>
   );

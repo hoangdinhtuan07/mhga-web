@@ -50,6 +50,19 @@ export async function saveRegistrations(
   const targetMonday = getTargetRegistrationWeekMonday(now);
   const weekStart = toDateKey(targetMonday);
 
+  const { data: published } = await supabase
+    .from("schedule")
+    .select("id")
+    .eq("week_start", weekStart)
+    .eq("status", "published")
+    .limit(1);
+  if ((published ?? []).length > 0) {
+    return {
+      success: false,
+      error: "Lịch tuần này đã được công bố, không thể sửa đăng ký.",
+    };
+  }
+
   const payload = Object.entries(entries).flatMap(([regDate, selection]) =>
     mergeSelectedSlots(selection).map((range) => ({
       reg_date: regDate,

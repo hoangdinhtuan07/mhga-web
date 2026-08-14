@@ -43,6 +43,11 @@ export function toDateKey({ year, month, day }: CalendarDate): string {
   return `${year}-${mm}-${dd}`;
 }
 
+export function parseDateKey(dateKey: string): CalendarDate {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return { year, month: month - 1, day };
+}
+
 export function getCurrentWeekMonday(now: VnNow): CalendarDate {
   return addDays(now, -(now.isoWeekday - 1));
 }
