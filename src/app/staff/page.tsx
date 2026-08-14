@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/supabase/get-profile";
 import { LogoutButton } from "@/components/logout-button";
+import { buttonVariants } from "@/components/ui/button";
 
 export default async function StaffHomePage() {
   const profile = await getCurrentProfile();
@@ -15,6 +17,9 @@ export default async function StaffHomePage() {
       <p className="text-muted-foreground">
         Vai trò: {profile.role === "admin" ? "Admin" : "Nhân viên"}
       </p>
+      <Link href="/register" className={buttonVariants({ className: "h-11" })}>
+        Đăng ký lịch làm việc
+      </Link>
       <LogoutButton />
     </main>
   );

@@ -16,9 +16,17 @@ export default async function AdminHomePage() {
         Xin chào, {profile.display_name}
       </h1>
       <p className="text-muted-foreground">Vai trò: Admin</p>
-      <Link href="/admin/accounts" className={buttonVariants({ className: "h-11" })}>
-        Quản lý tài khoản
-      </Link>
+      <div className="flex flex-wrap justify-center gap-2">
+        <Link
+          href="/admin/accounts"
+          className={buttonVariants({ variant: "outline", className: "h-11" })}
+        >
+          Quản lý tài khoản
+        </Link>
+        <Link href="/register" className={buttonVariants({ className: "h-11" })}>
+          Đăng ký lịch làm việc
+        </Link>
+      </div>
       <LogoutButton />
     </main>
   );
