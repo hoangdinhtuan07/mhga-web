@@ -23,8 +23,14 @@ export default async function AdminHomePage() {
         >
           Quản lý tài khoản
         </Link>
-        <Link href="/register" className={buttonVariants({ className: "h-11" })}>
-          Đăng ký lịch làm việc
+        <Link
+          href="/register"
+          className={buttonVariants({ variant: "outline", className: "h-11" })}
+        >
+          Đăng ký khoảng rảnh của tôi
+        </Link>
+        <Link href="/admin/schedule" className={buttonVariants({ className: "h-11" })}>
+          Xếp lịch làm việc
         </Link>
       </div>
       <LogoutButton />
