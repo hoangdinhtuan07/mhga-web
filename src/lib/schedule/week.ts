@@ -27,7 +27,7 @@ export function getVnNow(date: Date = new Date()): VnNow {
   };
 }
 
-function addDays(date: CalendarDate, deltaDays: number): CalendarDate {
+export function addDays(date: CalendarDate, deltaDays: number): CalendarDate {
   const ms = Date.UTC(date.year, date.month, date.day) + deltaDays * DAY_MS;
   const d = new Date(ms);
   return {
@@ -35,6 +35,10 @@ function addDays(date: CalendarDate, deltaDays: number): CalendarDate {
     month: d.getUTCMonth(),
     day: d.getUTCDate(),
   };
+}
+
+export function addWeeks(monday: CalendarDate, deltaWeeks: number): CalendarDate {
+  return addDays(monday, deltaWeeks * 7);
 }
 
 export function toDateKey({ year, month, day }: CalendarDate): string {

@@ -12,6 +12,26 @@ import {
 
 export type ActionResult = { success: true } | { success: false; error: string };
 
+const ALREADY_PUBLISHED_ERROR =
+  "Lịch tuần này đã được công bố, không thể chỉnh sửa thêm.";
+
+// Chặn mọi thao tác ghi (gán/vá/xoá/gợi ý/sửa nháp) một khi tuần đã công
+// bố — nếu không, chạy lại "Chạy gợi ý" hay công bố lần nữa trên cùng tuần
+// sẽ tạo thêm một bộ bản ghi song song với bộ đã công bố, gây trùng tên
+// hàng loạt trên trang chủ (lỗi thực tế đã gặp khi test).
+async function isWeekPublished(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  weekStart: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from("schedule")
+    .select("id")
+    .eq("week_start", weekStart)
+    .eq("status", "published")
+    .limit(1);
+  return (data ?? []).length > 0;
+}
+
 export async function assignShift(input: {
   weekStart: string;
   storeId: number;
@@ -23,6 +43,10 @@ export async function assignShift(input: {
   if (!admin) return { success: false, error: "Không có quyền." };
 
   const supabase = await createClient();
+
+  if (await isWeekPublished(supabase, input.weekStart)) {
+    return { success: false, error: ALREADY_PUBLISHED_ERROR };
+  }
 
   const { data: store } = await supabase
     .from("stores")
@@ -104,6 +128,10 @@ export async function patchGap(input: {
 
   const supabase = await createClient();
 
+  if (await isWeekPublished(supabase, input.weekStart)) {
+    return { success: false, error: ALREADY_PUBLISHED_ERROR };
+  }
+
   const { data: existingRows } = await supabase
     .from("schedule")
     .select("start_hour, end_hour")
@@ -144,6 +172,16 @@ export async function unassignShift(scheduleId: string): Promise<ActionResult> {
   if (!admin) return { success: false, error: "Không có quyền." };
 
   const supabase = await createClient();
+
+  const { data: row } = await supabase
+    .from("schedule")
+    .select("week_start")
+    .eq("id", scheduleId)
+    .single();
+  if (row && (await isWeekPublished(supabase, row.week_start))) {
+    return { success: false, error: ALREADY_PUBLISHED_ERROR };
+  }
+
   const { error } = await supabase
     .from("schedule")
     .delete()
@@ -173,6 +211,11 @@ export async function runSuggestion(weekStart: string): Promise<SuggestionResult
   if (!admin) return { success: false, error: "Không có quyền." };
 
   const supabase = await createClient();
+
+  if (await isWeekPublished(supabase, weekStart)) {
+    return { success: false, error: ALREADY_PUBLISHED_ERROR };
+  }
+
   const weekDays = getWeekDays(parseDateKey(weekStart)).map(toDateKey);
 
   const [{ data: users }, { data: registrations }, { data: storesData }, { data: shiftsData }] =
@@ -277,6 +320,10 @@ export async function editDraftCell(input: {
   if (!admin) return { success: false, error: "Không có quyền." };
 
   const supabase = await createClient();
+
+  if (await isWeekPublished(supabase, input.weekStart)) {
+    return { success: false, error: ALREADY_PUBLISHED_ERROR };
+  }
 
   const names = input.rawNames
     .split(",")
