@@ -14,3 +14,9 @@ export function usernameToEmail(username: string): string {
 export function normalizeUsername(input: string): string {
   return input.trim().toLowerCase();
 }
+
+const USERNAME_PATTERN = /^[a-z0-9._-]+$/;
+
+export function isValidUsername(username: string): boolean {
+  return USERNAME_PATTERN.test(username);
+}
