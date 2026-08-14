@@ -9,8 +9,10 @@ import {
   toDateKey,
 } from "@/lib/schedule/week";
 import { slotsFromRanges, type DaySelection } from "@/lib/schedule/registration";
+import type { ScheduleAssignment } from "@/lib/schedule/assignment";
 import { ScheduleWizard } from "./schedule-wizard";
 import type { EmployeeRegistration } from "./registration-overview-table";
+import type { StoreDef } from "./assignment-table";
 
 export default async function AdminSchedulePage() {
   const profile = await getCurrentProfile();
@@ -25,7 +27,13 @@ export default async function AdminSchedulePage() {
 
   const supabase = await createClient();
 
-  const [{ data: users }, { data: registrations }] = await Promise.all([
+  const [
+    { data: users },
+    { data: registrations },
+    { data: storesData },
+    { data: shiftsData },
+    { data: scheduleRows },
+  ] = await Promise.all([
     supabase
       .from("users")
       .select("id, display_name")
@@ -35,6 +43,15 @@ export default async function AdminSchedulePage() {
       .from("registrations")
       .select("user_id, reg_date, start_hour, end_hour")
       .eq("week_start", weekStart),
+    supabase.from("stores").select("id, name, allowed_shift_ids").order("id"),
+    supabase.from("shifts").select("id, start_hour, end_hour").order("id"),
+    supabase
+      .from("schedule")
+      .select(
+        "id, user_id, store_id, work_date, start_hour, end_hour, source, users(display_name)",
+      )
+      .eq("week_start", weekStart)
+      .eq("status", "draft"),
   ]);
 
   const employees: EmployeeRegistration[] = (users ?? []).map((u) => {
@@ -48,12 +65,40 @@ export default async function AdminSchedulePage() {
     return { id: u.id, displayName: u.display_name, selections };
   });
 
+  const stores: StoreDef[] = (storesData ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+    allowedShiftIds: s.allowed_shift_ids,
+  }));
+
+  const shifts = (shiftsData ?? []).map((s) => ({
+    id: s.id,
+    startHour: s.start_hour,
+    endHour: s.end_hour,
+  }));
+
+  const assignments: ScheduleAssignment[] = (scheduleRows ?? []).map((r) => ({
+    id: r.id,
+    userId: r.user_id,
+    displayName:
+      (r.users as unknown as { display_name: string } | null)?.display_name ?? "?",
+    storeId: r.store_id,
+    workDate: r.work_date,
+    startHour: r.start_hour,
+    endHour: r.end_hour,
+    source: r.source as "auto" | "manual",
+  }));
+
   return (
     <main className="mx-auto max-w-6xl space-y-6 p-4 md:p-8">
       <ScheduleWizard
+        weekStart={weekStart}
         weekLabel={weekLabel}
         weekDays={weekDays}
         employees={employees}
+        stores={stores}
+        shifts={shifts}
+        assignments={assignments}
       />
     </main>
   );

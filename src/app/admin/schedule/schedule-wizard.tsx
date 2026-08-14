@@ -6,6 +6,8 @@ import {
   RegistrationOverviewTable,
   type EmployeeRegistration,
 } from "./registration-overview-table";
+import { AssignmentTable, type StoreDef } from "./assignment-table";
+import type { ScheduleAssignment, ShiftDef } from "@/lib/schedule/assignment";
 
 const STEPS = [
   { id: 1, shortLabel: "Đăng ký", fullLabel: "Lịch đăng ký" },
@@ -15,13 +17,21 @@ const STEPS = [
 ] as const;
 
 export function ScheduleWizard({
+  weekStart,
   weekLabel,
   weekDays,
   employees,
+  stores,
+  shifts,
+  assignments,
 }: {
+  weekStart: string;
   weekLabel: string;
   weekDays: string[];
   employees: EmployeeRegistration[];
+  stores: StoreDef[];
+  shifts: ShiftDef[];
+  assignments: ScheduleAssignment[];
 }) {
   const [step, setStep] = useState(1);
 
@@ -57,7 +67,17 @@ export function ScheduleWizard({
       {step === 1 && (
         <RegistrationOverviewTable weekDays={weekDays} employees={employees} />
       )}
-      {step !== 1 && (
+      {step === 3 && (
+        <AssignmentTable
+          weekStart={weekStart}
+          weekDays={weekDays}
+          stores={stores}
+          shifts={shifts}
+          assignments={assignments}
+          employees={employees}
+        />
+      )}
+      {(step === 2 || step === 4) && (
         <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
           Bước này sẽ được xây ở phần tiếp theo của lộ trình.
         </div>
