@@ -60,3 +60,66 @@ export function isAvailableForShift(
     (r) => r.start <= shift.startHour && r.end >= shift.endHour,
   );
 }
+
+export type EmployeeLike = {
+  id: string;
+  displayName: string;
+  selections: Record<string, DaySelection>;
+};
+
+export type GapSuggestions<T extends EmployeeLike = EmployeeLike> = {
+  fullyAvailable: T[];
+  partial: { emp: T; coverStart: number; coverEnd: number }[];
+};
+
+/**
+ * Gợi ý cho ô đỏ ở bảng xem lại (mục 4.3, Bước 3): "Rảnh trọn khung" — khoảng
+ * rảnh bao trọn lát cắt và chưa bận; "Vá được một phần" — chỉ phủ được một
+ * khúc (giao giữa khoảng rảnh và lát cắt), phần còn lại vẫn đỏ.
+ */
+export function getGapSuggestions<T extends EmployeeLike>(
+  day: string,
+  slice: { start: number; end: number },
+  employees: T[],
+  allAssignments: ScheduleAssignment[],
+): GapSuggestions<T> {
+  const fullyAvailable: T[] = [];
+  const partial: { emp: T; coverStart: number; coverEnd: number }[] = [];
+
+  for (const emp of employees) {
+    if (
+      isUserBusy(
+        emp.id,
+        day,
+        { startHour: slice.start, endHour: slice.end },
+        allAssignments,
+      )
+    )
+      continue;
+
+    const ranges = mergeSelectedSlots(
+      emp.selections[day] ?? [false, false, false, false],
+    );
+
+    const fullyCovers = ranges.some(
+      (r) => r.start <= slice.start && r.end >= slice.end,
+    );
+    if (fullyCovers) {
+      fullyAvailable.push(emp);
+      continue;
+    }
+
+    const overlapping = ranges.find(
+      (r) => r.start < slice.end && slice.start < r.end,
+    );
+    if (overlapping) {
+      partial.push({
+        emp,
+        coverStart: Math.max(overlapping.start, slice.start),
+        coverEnd: Math.min(overlapping.end, slice.end),
+      });
+    }
+  }
+
+  return { fullyAvailable, partial };
+}

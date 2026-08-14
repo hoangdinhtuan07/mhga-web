@@ -12,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { countStoreDayGaps } from "@/lib/schedule/coverage";
 import {
   isAvailableForShift,
   isOtherRowAssignment,
@@ -33,7 +32,6 @@ const WEEKDAY_LABELS = [
   "Thứ 7",
   "Chủ nhật",
 ];
-const WEEKDAY_SHORT = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 function formatDayShort(dateKey: string) {
   const [, m, d] = dateKey.split("-");
@@ -131,6 +129,8 @@ function AddPersonMenu({
   );
 }
 
+// Bảng "Cửa hàng × Ca × Ngày" — chỉ bố cục máy tính. Bố cục điện thoại của
+// Bước 3 gộp chung với bảng xem lại trong MobileShiftEditor (mục 9).
 export function AssignmentTable({
   weekStart,
   weekDays,
@@ -147,15 +147,8 @@ export function AssignmentTable({
   employees: EmployeeRegistration[];
 }) {
   const router = useRouter();
-  const [selectedDay, setSelectedDay] = useState(weekDays[0]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  const gapCount = countStoreDayGaps(
-    stores.map((s) => s.id),
-    weekDays,
-    assignments,
-  );
 
   function cellAssignments(storeId: number, day: string, shift: ShiftDef) {
     return assignments.filter(
@@ -218,11 +211,7 @@ export function AssignmentTable({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        {gapCount > 0
-          ? `Còn ${gapCount} cửa hàng-ngày còn khoảng trống giờ.`
-          : "Đã phủ kín toàn bộ khung giờ mở cửa."}
-      </p>
+      <h2 className="font-medium">Bảng gán người</h2>
 
       {error && (
         <p
@@ -233,8 +222,7 @@ export function AssignmentTable({
         </p>
       )}
 
-      {/* Bố cục máy tính */}
-      <div className="hidden overflow-x-auto rounded-md border md:block">
+      <div className="overflow-x-auto rounded-md border">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr>
@@ -344,95 +332,6 @@ export function AssignmentTable({
             })}
           </tbody>
         </table>
-      </div>
-
-      {/* Bố cục điện thoại: chọn 1 ngày, xem/sửa theo từng cửa hàng.
-          Sẽ gộp với bảng xem lại ở Bước 3 (7c) theo đúng mục 9. */}
-      <div className="space-y-3 md:hidden">
-        <div className="flex gap-1 overflow-x-auto pb-1">
-          {weekDays.map((day, i) => (
-            <button
-              key={day}
-              type="button"
-              onClick={() => setSelectedDay(day)}
-              className={cn(
-                "flex h-11 shrink-0 flex-col items-center justify-center rounded-md border px-3 text-xs font-medium",
-                selectedDay === day
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-input",
-              )}
-            >
-              <span>{WEEKDAY_SHORT[i]}</span>
-              <span className="font-normal text-muted-foreground">
-                {formatDayShort(day)}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          {stores.map((store) => {
-            const storeShifts = shifts.filter((s) =>
-              store.allowedShiftIds.includes(s.id),
-            );
-            const otherItems = otherRowAssignments(store.id, selectedDay, storeShifts);
-            return (
-              <div key={store.id} className="space-y-2 rounded-lg border p-3">
-                <p className="font-medium">{store.name}</p>
-                {storeShifts.map((shift) => {
-                  const cellItems = cellAssignments(store.id, selectedDay, shift);
-                  const eligible = eligibleFor(
-                    selectedDay,
-                    shift,
-                    cellItems.map((c) => c.userId),
-                  );
-                  return (
-                    <div key={shift.id} className="space-y-1">
-                      <p className="text-xs text-muted-foreground">
-                        {shift.startHour}-{shift.endHour}h
-                      </p>
-                      <div className="flex flex-wrap items-center gap-1">
-                        {cellItems.map((item) => (
-                          <Chip
-                            key={item.id}
-                            name={item.displayName}
-                            source={item.source}
-                            disabled={isPending}
-                            onRemove={() => handleUnassign(item.id)}
-                          />
-                        ))}
-                        <AddPersonMenu
-                          eligible={eligible}
-                          disabled={isPending}
-                          onPick={(userId) =>
-                            handleAssign(store.id, shift.id, selectedDay, userId)
-                          }
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">Khác</p>
-                  <div className="flex flex-wrap items-center gap-1">
-                    {otherItems.length === 0 && (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                    {otherItems.map((item) => (
-                      <Chip
-                        key={item.id}
-                        name={`${item.displayName} ${item.startHour}-${item.endHour}h`}
-                        source={item.source}
-                        disabled={isPending}
-                        onRemove={() => handleUnassign(item.id)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </div>
   );

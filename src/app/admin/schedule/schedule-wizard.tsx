@@ -6,7 +6,8 @@ import {
   RegistrationOverviewTable,
   type EmployeeRegistration,
 } from "./registration-overview-table";
-import { AssignmentTable, type StoreDef } from "./assignment-table";
+import type { StoreDef } from "./assignment-table";
+import { Step3Content } from "./step3-content";
 import type { ScheduleAssignment, ShiftDef } from "@/lib/schedule/assignment";
 
 const STEPS = [
@@ -68,7 +69,7 @@ export function ScheduleWizard({
         <RegistrationOverviewTable weekDays={weekDays} employees={employees} />
       )}
       {step === 3 && (
-        <AssignmentTable
+        <Step3Content
           weekStart={weekStart}
           weekDays={weekDays}
           stores={stores}
