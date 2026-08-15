@@ -6,8 +6,8 @@ export const TABLE_HEADER_ROW = "bg-[var(--bg-header)]";
 export const TABLE_HEADER_CELL = "text-[var(--text-header)] font-medium";
 export const TABLE_HEADER_DAY = "border-l-[1.5px] border-l-[var(--border)]";
 
-export const STORE_CELL = "bg-[var(--surface-1)] text-[var(--text-primary)] font-semibold";
-export const HOUR_CELL = "bg-[var(--surface-1)] text-[var(--text-secondary)]";
+export const STORE_CELL = "bg-white text-[var(--text-primary)] font-semibold";
+export const HOUR_CELL = "bg-white text-[var(--text-secondary)]";
 
 export const CELL_BASE = "border-l-[1.5px] border-l-[var(--border)]";
 export const CELL_FILLED = "bg-[var(--bg-success)] text-[var(--text-success)]";
