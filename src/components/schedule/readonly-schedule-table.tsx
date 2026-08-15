@@ -54,7 +54,14 @@ export function ReadonlyScheduleTable({
 
       {/* Bố cục máy tính */}
       <div className="hidden overflow-x-auto rounded-[var(--radius)] border border-[var(--border)] md:block">
-        <table className="w-full border-collapse text-[11px]">
+        <table className="w-full table-fixed border-collapse text-[11px]">
+          <colgroup>
+            <col style={{ width: "88px" }} />
+            <col style={{ width: "58px" }} />
+            {weekDays.map((day) => (
+              <col key={day} />
+            ))}
+          </colgroup>
           <thead>
             <tr className={TABLE_HEADER_ROW}>
               <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Cửa hàng</th>
