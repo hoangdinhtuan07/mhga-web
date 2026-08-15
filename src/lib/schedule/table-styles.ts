@@ -7,7 +7,7 @@ export const TABLE_HEADER_CELL = "text-[var(--text-header)] font-medium";
 export const TABLE_HEADER_DAY = "border-l-[1.5px] border-l-[var(--border)]";
 
 export const STORE_CELL = "bg-white text-[var(--text-primary)] font-semibold";
-export const HOUR_CELL = "bg-white text-[var(--text-secondary)] font-semibold";
+export const HOUR_CELL = "bg-white text-[var(--text-secondary)] font-semibold text-center";
 
 export const CELL_BASE = "border-l-[1.5px] border-l-[var(--border)]";
 export const CELL_FILLED = "bg-[var(--bg-success)] text-[var(--text-success)]";

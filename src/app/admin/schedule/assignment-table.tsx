@@ -226,7 +226,7 @@ export function AssignmentTable({
           <thead>
             <tr className={TABLE_HEADER_ROW}>
               <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Cửa hàng</th>
-              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Ca</th>
+              <th className={cn("p-2 text-center", TABLE_HEADER_CELL)}>Ca</th>
               {weekDays.map((day, i) => (
                 <th
                   key={day}
