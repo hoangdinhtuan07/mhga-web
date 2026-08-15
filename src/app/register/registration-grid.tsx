@@ -194,14 +194,14 @@ export function RegistrationGrid({
               </tr>
             ))}
             <tr>
-              <td className="border-t-2 border-t-[var(--border-strong)] bg-white p-2 text-[10px] font-semibold text-[var(--text-muted)]">
+              <td className="border-t-2 border-t-[var(--border-strong)] bg-white p-2 text-sm font-bold text-[var(--text-muted)]">
                 Có thể làm
               </td>
               {weekDays.map((day) => (
                 <td
                   key={day}
                   className={cn(
-                    "border-t-2 border-t-[var(--border-strong)] border-l-[1.5px] border-l-[var(--border)] p-1.5 text-center text-[10px] font-semibold",
+                    "border-t-2 border-t-[var(--border-strong)] border-l-[1.5px] border-l-[var(--border)] p-1.5 text-center text-sm font-bold",
                     dayValidity[day]
                       ? "text-[var(--text-accent)]"
                       : "text-[var(--text-danger)]",
@@ -209,7 +209,7 @@ export function RegistrationGrid({
                 >
                   {dayValidity[day]
                     ? formatRanges(mergeSelectedSlots(selections[day])) || (
-                        <span className="font-normal text-[var(--text-muted)]">—</span>
+                        <span className="text-[var(--text-muted)]">—</span>
                       )
                     : "Chưa hợp lệ"}
                 </td>
