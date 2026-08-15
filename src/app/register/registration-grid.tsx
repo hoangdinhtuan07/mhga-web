@@ -163,7 +163,7 @@ export function RegistrationGrid({
           <tbody>
             {SLOTS.map((slot, slotIndex) => (
               <tr key={slot.label} className="border-t border-t-[var(--border)]">
-                <td className="bg-[var(--surface-1)] p-2 text-[var(--text-secondary)] whitespace-nowrap">
+                <td className="bg-white p-2 text-[var(--text-secondary)] whitespace-nowrap">
                   {slot.label}
                 </td>
                 {weekDays.map((day) => {
@@ -182,7 +182,7 @@ export function RegistrationGrid({
                           "h-[30px] w-full text-sm transition-colors",
                           isSelected && dayOk && "bg-[var(--bg-success)] text-[var(--text-success)]",
                           isSelected && !dayOk && "bg-[var(--bg-danger)] text-[var(--text-danger)]",
-                          !isSelected && "bg-[var(--surface-1)] text-[var(--text-muted)]",
+                          !isSelected && "bg-white text-[var(--text-muted)]",
                           locked && "cursor-not-allowed opacity-70",
                         )}
                       >
@@ -194,7 +194,7 @@ export function RegistrationGrid({
               </tr>
             ))}
             <tr>
-              <td className="border-t-2 border-t-[var(--border-strong)] bg-[var(--surface-1)] p-2 text-[10px] text-[var(--text-muted)]">
+              <td className="border-t-2 border-t-[var(--border-strong)] bg-white p-2 text-[10px] text-[var(--text-muted)]">
                 Có thể làm
               </td>
               {weekDays.map((day) => (
