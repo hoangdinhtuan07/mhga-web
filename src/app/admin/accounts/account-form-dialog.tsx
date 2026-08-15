@@ -1,13 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +24,8 @@ function generatePassword() {
   return result;
 }
 
+// Form thêm/sửa tài khoản mở NGAY TRONG TRANG (không dùng Dialog popup) —
+// khớp giao diện tham khảo: "+ Thêm tài khoản" mở rộng khối form bên dưới.
 export function AccountFormDialog({
   account,
   onClose,
@@ -111,36 +106,28 @@ export function AccountFormDialog({
 
   if (result) {
     return (
-      <Dialog open onOpenChange={onSaved}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Đã tạo tài khoản</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2 text-sm">
-            <p>Báo lại cho nhân viên thông tin đăng nhập sau:</p>
-            <div className="space-y-1 rounded-md border bg-muted p-3 font-mono text-sm">
-              <p>Tên đăng nhập: {result.username}</p>
-              <p>Mật khẩu: {result.password}</p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button className="h-11" onClick={onSaved}>
-              Đóng
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <div className="space-y-3 rounded-[var(--radius)] bg-[var(--bg-success)] p-5">
+        <h2 className="font-medium text-[var(--text-success)]">Đã tạo tài khoản</h2>
+        <p className="text-sm text-[var(--text-success)]">
+          Báo lại cho nhân viên thông tin đăng nhập sau:
+        </p>
+        <div className="space-y-1 rounded-lg bg-[var(--surface-2)] p-3 font-mono text-sm">
+          <p>Tên đăng nhập: {result.username}</p>
+          <p>Mật khẩu: {result.password}</p>
+        </div>
+        <Button className="h-11" onClick={onSaved}>
+          Đóng
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Sửa tài khoản" : "Thêm tài khoản"}</DialogTitle>
-        </DialogHeader>
+    <div className="space-y-4 rounded-[var(--radius)] border p-5">
+      <h2 className="font-medium">{isEdit ? "Sửa tài khoản" : "Thêm tài khoản mới"}</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="display-name">Tên hiển thị</Label>
             <Input
@@ -150,12 +137,6 @@ export function AccountFormDialog({
               onChange={(event) => setDisplayName(event.target.value)}
               autoFocus
             />
-            {isEdit && (
-              <p className="text-xs text-muted-foreground">
-                Đổi tên hiển thị sẽ thay đổi trên mọi bảng lịch, kể cả lịch đã
-                công bố.
-              </p>
-            )}
           </div>
 
           <div className="space-y-2">
@@ -185,50 +166,51 @@ export function AccountFormDialog({
               </SelectContent>
             </Select>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">
-              {isEdit ? "Mật khẩu mới (để trống nếu giữ nguyên)" : "Mật khẩu"}
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="password"
-                className="h-11"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                className="h-11 shrink-0"
-                onClick={() => setPassword(generatePassword())}
-              >
-                Tạo ngẫu nhiên
-              </Button>
-            </div>
-          </div>
+        {isEdit && (
+          <p className="text-xs text-muted-foreground">
+            Đổi tên hiển thị sẽ thay đổi trên mọi bảng lịch, kể cả lịch đã công bố.
+          </p>
+        )}
 
-          {error && (
-            <p role="alert" className="text-sm text-destructive">
-              {error}
-            </p>
-          )}
-
-          <DialogFooter>
+        <div className="space-y-2">
+          <Label htmlFor="password">
+            {isEdit ? "Mật khẩu mới (để trống nếu giữ nguyên)" : "Mật khẩu"}
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              id="password"
+              className="h-11"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
             <Button
               type="button"
               variant="outline"
-              className="h-11"
-              onClick={onClose}
+              className="h-11 shrink-0"
+              onClick={() => setPassword(generatePassword())}
             >
-              Huỷ
+              Tạo ngẫu nhiên
             </Button>
-            <Button type="submit" className="h-11" disabled={loading}>
-              {loading ? "Đang lưu..." : isEdit ? "Lưu" : "Tạo tài khoản"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </div>
+        </div>
+
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        )}
+
+        <div className="flex gap-2">
+          <Button type="submit" className="h-11" disabled={loading}>
+            {loading ? "Đang lưu..." : isEdit ? "Lưu" : "Tạo tài khoản"}
+          </Button>
+          <Button type="button" variant="outline" className="h-11" onClick={onClose}>
+            Huỷ
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }

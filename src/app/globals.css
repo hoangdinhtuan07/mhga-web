@@ -7,7 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -48,73 +49,131 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ============================================================
+   BẢNG MÀU VÀ TOKEN THIẾT KẾ — nguồn: giao-dien-tham-chieu-mhgaweb.html
+   (CHUẨN GIAO DIỆN của dự án). Giữ đúng tên biến, đúng mã hex, không đổi
+   giá trị. Dùng trực tiếp trong component qua className kiểu
+   bg-[var(--bg-success)] text-[var(--text-success)]...
+   ============================================================ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* nền và chữ */
+  --bg: #ffffff;
+  --surface-1: #f5f5f4; /* nền phụ: cột tên cửa hàng, thẻ, ô input */
+  --surface-2: #ffffff; /* nền chip */
+  --text-primary: #1c1917; /* chữ chính, tiêu đề */
+  --text-secondary: #57534e; /* chữ phụ, mô tả */
+  --text-muted: #a8a29e; /* chữ mờ, placeholder, nhãn giờ */
+  --border: #e7e5e4; /* viền nhạt */
+  --border-strong: #a8a29e; /* viền đậm ngăn cách cửa hàng */
+  --border-accent: #93c5fd; /* viền chip do admin vá tay */
+
+  /* trạng thái ô lịch */
+  --bg-success: #dcfce7; /* ô XANH: đã có người */
+  --text-success: #166534;
+  --bg-danger: #fee2e2; /* ô ĐỎ: còn trống */
+  --text-danger: #991b1b;
+  --bg-warning: #fef3c7; /* ô VÀNG: cảnh báo */
+  --text-warning: #92400e;
+  --bg-accent: #dbeafe; /* ô XANH DƯƠNG: ca của chính mình */
+  --text-accent: #1e40af;
+
+  /* nút chính */
+  --fill-primary: #1c1917;
+  --on-primary: #fafaf9;
+
+  /* header bảng */
+  --bg-header: #ede9fe;
+  --text-header: #5b21b6;
+
+  /* ánh xạ sang token shadcn có sẵn (Button/Input/Table/Dialog... đều dùng
+     các biến này) để toàn bộ UI component tự động theo đúng bảng màu trên,
+     không cần sửa từng component riêng lẻ. */
+  --background: var(--bg);
+  --foreground: var(--text-primary);
+  --card: var(--surface-2);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-2);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--fill-primary);
+  --primary-foreground: var(--on-primary);
+  --secondary: var(--surface-1);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface-1);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--surface-1);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--text-danger);
+  --input: var(--border);
+  --ring: var(--border-strong);
+  --chart-1: var(--bg-header);
+  --chart-2: var(--bg-accent);
+  --chart-3: var(--bg-success);
+  --chart-4: var(--bg-warning);
+  --chart-5: var(--bg-danger);
+  --radius: 10px;
+  --sidebar: var(--surface-1);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--fill-primary);
+  --sidebar-primary-foreground: var(--on-primary);
+  --sidebar-accent: var(--surface-1);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--border-strong);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --bg: #1c1917;
+  --surface-1: #292524;
+  --surface-2: #1c1917;
+  --text-primary: #fafaf9;
+  --text-secondary: #d6d3d1;
+  --text-muted: #78716c;
+  --border: #44403c;
+  --border-strong: #78716c;
+  --border-accent: #1d4ed8;
+  --bg-success: #052e1c;
+  --text-success: #4ade80;
+  --bg-danger: #450a0a;
+  --text-danger: #f87171;
+  --bg-warning: #451a03;
+  --text-warning: #fbbf24;
+  --bg-accent: #172554;
+  --text-accent: #93c5fd;
+  --fill-primary: #e7e5e4;
+  --on-primary: #1c1917;
+  --bg-header: #2e1065;
+  --text-header: #c4b5fd;
+
+  --background: var(--bg);
+  --foreground: var(--text-primary);
+  --card: var(--surface-2);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-2);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--fill-primary);
+  --primary-foreground: var(--on-primary);
+  --secondary: var(--surface-1);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface-1);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--surface-1);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--text-danger);
+  --input: var(--border);
+  --ring: var(--border-strong);
+  --chart-1: var(--bg-header);
+  --chart-2: var(--bg-accent);
+  --chart-3: var(--bg-success);
+  --chart-4: var(--bg-warning);
+  --chart-5: var(--bg-danger);
+  --sidebar: var(--surface-1);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--fill-primary);
+  --sidebar-primary-foreground: var(--on-primary);
+  --sidebar-accent: var(--surface-1);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--border-strong);
 }
 
 @layer base {
@@ -123,6 +182,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
   }
   html {
     @apply font-sans;

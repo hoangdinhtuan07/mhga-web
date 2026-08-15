@@ -22,21 +22,17 @@ import {
 import type { DaySelection } from "@/lib/schedule/registration";
 import type { EmployeeRegistration } from "./registration-overview-table";
 import { assignShift, unassignShift } from "./actions";
+import {
+  HOUR_CELL,
+  STORE_CELL,
+  STORE_ROW,
+  STORE_START_ROW,
+  TABLE_HEADER_CELL,
+  TABLE_HEADER_DAY,
+  TABLE_HEADER_ROW,
+} from "@/lib/schedule/table-styles";
 
-const WEEKDAY_LABELS = [
-  "Thứ 2",
-  "Thứ 3",
-  "Thứ 4",
-  "Thứ 5",
-  "Thứ 6",
-  "Thứ 7",
-  "Chủ nhật",
-];
-
-function formatDayShort(dateKey: string) {
-  const [, m, d] = dateKey.split("-");
-  return `${d}/${m}`;
-}
+const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 export type StoreDef = {
   id: number;
@@ -58,10 +54,8 @@ function Chip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs whitespace-nowrap",
-        source === "manual"
-          ? "border-primary/60 bg-primary/10"
-          : "border-border bg-muted",
+        "inline-flex items-center rounded-[10px] border bg-[var(--surface-2)] px-1.5 py-0.5 text-[10px] whitespace-nowrap text-[var(--text-primary)]",
+        source === "manual" ? "border-[var(--border-accent)]" : "border-[var(--border)]",
       )}
     >
       {name}
@@ -69,7 +63,7 @@ function Chip({
         type="button"
         disabled={disabled}
         onClick={onRemove}
-        className="text-muted-foreground hover:text-destructive disabled:opacity-50"
+        className="ml-[3px] text-[11px] text-[var(--text-muted)] disabled:opacity-50"
         aria-label={`Bỏ ${name}`}
       >
         ×
@@ -92,10 +86,10 @@ function AddPersonMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={disabled}
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-dashed text-muted-foreground hover:border-primary hover:text-primary disabled:opacity-50"
+        className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-50"
         aria-label="Thêm người"
       >
-        +
+        ⌄
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {!hasAny && (
@@ -211,36 +205,34 @@ export function AssignmentTable({
 
   return (
     <div className="space-y-4">
-      <h2 className="font-medium">Bảng gán người</h2>
+      <div>
+        <h2 className="font-medium">Bảng gán người</h2>
+        <p className="text-sm text-[var(--text-muted)]">
+          Dòng &quot;Khác&quot; chứa ca lẻ vá tay
+        </p>
+      </div>
 
       {error && (
         <p
           role="alert"
-          className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+          className="rounded-[var(--radius)] bg-[var(--bg-danger)] p-4 text-sm text-[var(--text-danger)]"
         >
           {error}
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-md border">
-        <table className="w-full border-collapse text-sm">
+      <div className="overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
+        <table className="w-full border-collapse text-[11px]">
           <thead>
-            <tr>
-              <th className="border-b border-r bg-muted/40 p-2 text-left font-medium">
-                Cửa hàng
-              </th>
-              <th className="border-b border-r bg-muted/20 p-2 text-left font-medium">
-                Ca
-              </th>
+            <tr className={TABLE_HEADER_ROW}>
+              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Cửa hàng</th>
+              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Ca</th>
               {weekDays.map((day, i) => (
                 <th
                   key={day}
-                  className="border-b border-l p-2 text-center font-medium"
+                  className={cn("p-2 text-center", TABLE_HEADER_CELL, TABLE_HEADER_DAY)}
                 >
-                  <div>{WEEKDAY_LABELS[i]}</div>
-                  <div className="text-xs font-normal text-muted-foreground">
-                    {formatDayShort(day)}
-                  </div>
+                  {WEEKDAY_LABELS[i]}
                 </th>
               ))}
             </tr>
@@ -254,19 +246,13 @@ export function AssignmentTable({
               return (
                 <Fragment key={store.id}>
                   {storeShifts.map((shift, idx) => (
-                    <tr
-                      key={shift.id}
-                      className={idx === 0 ? "border-t-4 border-t-foreground/20" : ""}
-                    >
+                    <tr key={shift.id} className={idx === 0 ? STORE_START_ROW : STORE_ROW}>
                       {idx === 0 && (
-                        <td
-                          rowSpan={rowCount}
-                          className="border-r bg-muted/40 p-2 align-top font-medium"
-                        >
+                        <td rowSpan={rowCount} className={cn("p-2 align-middle", STORE_CELL)}>
                           {store.name}
                         </td>
                       )}
-                      <td className="border-r bg-muted/20 p-2 text-xs whitespace-nowrap">
+                      <td className={cn("p-2 whitespace-nowrap", HOUR_CELL)}>
                         {shift.startHour}-{shift.endHour}h
                       </td>
                       {weekDays.map((day) => {
@@ -277,8 +263,13 @@ export function AssignmentTable({
                           cellItems.map((c) => c.userId),
                         );
                         return (
-                          <td key={day} className="border-l p-1.5 align-top">
-                            <div className="flex flex-wrap items-center gap-1">
+                          <td key={day} className="border-l-[1.5px] border-l-[var(--border)] p-0.5">
+                            <div
+                              className={cn(
+                                "flex min-h-[18px] flex-wrap items-center gap-0.5 rounded p-0.5",
+                                cellItems.length > 0 && "bg-[var(--bg-success)]",
+                              )}
+                            >
                               {cellItems.map((item) => (
                                 <Chip
                                   key={item.id}
@@ -301,18 +292,18 @@ export function AssignmentTable({
                       })}
                     </tr>
                   ))}
-                  <tr>
-                    <td className="border-r bg-muted/20 p-2 text-xs whitespace-nowrap text-muted-foreground">
-                      Khác
-                    </td>
+                  <tr className={STORE_ROW}>
+                    <td className={cn("p-2 whitespace-nowrap", HOUR_CELL)}>Khác</td>
                     {weekDays.map((day) => {
                       const items = otherRowAssignments(store.id, day, storeShifts);
                       return (
-                        <td key={day} className="border-l p-1.5 align-top">
-                          <div className="flex flex-wrap items-center gap-1">
-                            {items.length === 0 && (
-                              <span className="text-xs text-muted-foreground">—</span>
+                        <td key={day} className="border-l-[1.5px] border-l-[var(--border)] p-0.5">
+                          <div
+                            className={cn(
+                              "flex min-h-[18px] flex-wrap items-center gap-0.5 rounded p-0.5",
+                              items.length > 0 && "bg-[var(--bg-success)]",
                             )}
+                          >
                             {items.map((item) => (
                               <Chip
                                 key={item.id}

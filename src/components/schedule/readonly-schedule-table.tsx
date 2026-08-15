@@ -2,6 +2,19 @@ import { Fragment } from "react";
 import { cn } from "@/lib/utils";
 import { buildStoreGrid } from "@/lib/schedule/grid";
 import type { ScheduleAssignment } from "@/lib/schedule/assignment";
+import {
+  CELL_BASE,
+  CELL_EMPTY,
+  CELL_FILLED,
+  CELL_MINE,
+  HOUR_CELL,
+  STORE_CELL,
+  STORE_ROW,
+  STORE_START_ROW,
+  TABLE_HEADER_CELL,
+  TABLE_HEADER_DAY,
+  TABLE_HEADER_ROW,
+} from "@/lib/schedule/table-styles";
 
 const WEEKDAY_LABELS = [
   "Thứ 2",
@@ -19,10 +32,10 @@ function formatDayShort(dateKey: string) {
 }
 
 /**
- * "Bảng lịch chung" ở chế độ readonly (mục 4.2: "dùng chung component với
- * Bước 4 của admin, chế độ chỉ đọc, không có nút công bố") — dùng lại
- * buildStoreGrid (thuật toán lát cắt) như draft-schedule-grid.tsx (edit) và
- * schedule-review.tsx (pick), chỉ khác ở chỗ không có tương tác.
+ * "Bảng lịch chung" (mục 4.2, khớp giao-dien-tham-chieu-mhgaweb.html mục 2)
+ * — dùng lại buildStoreGrid (thuật toán lát cắt) như draft-schedule-grid.tsx
+ * (edit) và schedule-review.tsx (pick), chỉ khác ở chỗ không có tương tác.
+ * Ô đỏ để trống, không ghi chữ.
  */
 export function ReadonlyScheduleTable({
   weekDays,
@@ -40,22 +53,18 @@ export function ReadonlyScheduleTable({
       <h2 className="font-medium">Lịch làm việc cả hệ thống</h2>
 
       {/* Bố cục máy tính */}
-      <div className="hidden overflow-x-auto rounded-md border md:block">
-        <table className="w-full border-collapse text-sm">
+      <div className="hidden overflow-x-auto rounded-[var(--radius)] border border-[var(--border)] md:block">
+        <table className="w-full border-collapse text-[11px]">
           <thead>
-            <tr>
-              <th className="border-b border-r bg-muted/40 p-2 text-left font-medium">
-                Cửa hàng
-              </th>
-              <th className="border-b border-r bg-muted/20 p-2 text-left font-medium">
-                Mốc giờ
-              </th>
+            <tr className={TABLE_HEADER_ROW}>
+              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Cửa hàng</th>
+              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Giờ</th>
               {weekDays.map((day, i) => (
-                <th key={day} className="border-b border-l p-2 text-center font-medium">
-                  <div>{WEEKDAY_LABELS[i]}</div>
-                  <div className="text-xs font-normal text-muted-foreground">
-                    {formatDayShort(day)}
-                  </div>
+                <th
+                  key={day}
+                  className={cn("p-2 text-center", TABLE_HEADER_CELL, TABLE_HEADER_DAY)}
+                >
+                  {WEEKDAY_LABELS[i].replace("Thứ ", "T").replace("Chủ nhật", "CN")}
                 </th>
               ))}
             </tr>
@@ -70,17 +79,14 @@ export function ReadonlyScheduleTable({
                   {slices.map((slice, sliceIndex) => (
                     <tr
                       key={`${slice.start}-${slice.end}`}
-                      className={sliceIndex === 0 ? "border-t-4 border-t-foreground/20" : ""}
+                      className={sliceIndex === 0 ? STORE_START_ROW : STORE_ROW}
                     >
                       {sliceIndex === 0 && (
-                        <td
-                          rowSpan={slices.length}
-                          className="border-r bg-muted/40 p-2 align-top font-medium"
-                        >
+                        <td rowSpan={slices.length} className={cn("p-2 align-middle", STORE_CELL)}>
                           {store.name}
                         </td>
                       )}
-                      <td className="border-r bg-muted/20 p-2 text-xs whitespace-nowrap">
+                      <td className={cn("p-2 whitespace-nowrap", HOUR_CELL)}>
                         {slice.start}-{slice.end}h
                       </td>
                       {weekDays.map((day) => {
@@ -89,14 +95,17 @@ export function ReadonlyScheduleTable({
                         );
                         if (!segment) return null;
                         const hasMe = segment.people.some((p) => p.id === highlightUserId);
+                        const isEmpty = segment.people.length === 0;
                         return (
                           <td
                             key={day}
                             rowSpan={segment.sliceCount}
                             className={cn(
-                              "border-l p-1.5 align-top text-xs",
-                              segment.people.length === 0 && "bg-destructive/5",
-                              hasMe && "bg-primary/20 font-bold",
+                              "p-2 text-center align-middle",
+                              CELL_BASE,
+                              isEmpty && CELL_EMPTY,
+                              !isEmpty && !hasMe && CELL_FILLED,
+                              hasMe && CELL_MINE,
                             )}
                           >
                             {segment.people.map((p) => p.displayName).join(", ")}
@@ -119,15 +128,18 @@ export function ReadonlyScheduleTable({
             (a) => a.userId === highlightUserId && a.workDate === day,
           );
           return (
-            <details key={day} className="group rounded-lg border p-3">
+            <details
+              key={day}
+              className="group rounded-[var(--radius)] border border-[var(--border)] p-4"
+            >
               <summary className="flex cursor-pointer items-center justify-between font-medium marker:content-none">
                 <span>
                   {WEEKDAY_LABELS[dayIndex]} · {formatDayShort(day)}
-                  <span className="ml-1 font-normal text-muted-foreground">
+                  <span className="ml-1 font-normal text-[var(--text-muted)]">
                     · {hasShiftToday ? "bạn có ca" : "bạn nghỉ"}
                   </span>
                 </span>
-                <span className="text-muted-foreground group-open:rotate-180">▾</span>
+                <span className="text-[var(--text-muted)] group-open:rotate-180">▾</span>
               </summary>
               <div className="mt-3 space-y-2">
                 {stores.map((store) => {
@@ -148,8 +160,8 @@ export function ReadonlyScheduleTable({
                           <p
                             key={`${start}-${end}`}
                             className={cn(
-                              "pl-2 text-sm",
-                              hasMe && "font-bold text-primary",
+                              "rounded-md px-2 py-1 text-sm",
+                              hasMe ? CELL_MINE : CELL_FILLED,
                             )}
                           >
                             {start}-{end}h: {seg.people.map((p) => p.displayName).join(", ")}

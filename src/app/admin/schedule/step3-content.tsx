@@ -39,15 +39,19 @@ export function Step3Content({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-2">
+      <div>
+        <h2 className="font-semibold">Bước 3 — Kiểm tra và chỉnh lịch</h2>
+      </div>
+
+      <div className="grid grid-cols-2 gap-1.5 sm:inline-flex">
         <button
           type="button"
           onClick={() => setTab("registrations")}
           className={cn(
-            "h-11 rounded-md border text-sm font-medium",
+            "h-11 rounded-lg px-5 text-sm font-medium transition-colors",
             tab === "registrations"
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-input hover:bg-muted",
+              ? "bg-[var(--fill-primary)] text-[var(--on-primary)]"
+              : "bg-[var(--surface-1)] text-[var(--text-muted)] hover:text-[var(--text-primary)]",
           )}
         >
           Lịch đăng ký
@@ -56,10 +60,10 @@ export function Step3Content({
           type="button"
           onClick={() => setTab("edit")}
           className={cn(
-            "h-11 rounded-md border text-sm font-medium",
+            "h-11 rounded-lg px-5 text-sm font-medium transition-colors",
             tab === "edit"
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-input hover:bg-muted",
+              ? "bg-[var(--fill-primary)] text-[var(--on-primary)]"
+              : "bg-[var(--surface-1)] text-[var(--text-muted)] hover:text-[var(--text-primary)]",
           )}
         >
           Chỉnh lịch
@@ -72,10 +76,17 @@ export function Step3Content({
 
       {tab === "edit" && (
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {gapCount > 0
-              ? `Còn ${gapCount} cửa hàng-ngày còn khoảng trống giờ.`
-              : "Đã phủ kín toàn bộ khung giờ mở cửa."}
+          <p className="text-sm">
+            Cả tuần còn{" "}
+            <span
+              className={cn(
+                "text-lg font-bold",
+                gapCount > 0 ? "text-[var(--text-danger)]" : "text-[var(--text-success)]",
+              )}
+            >
+              {gapCount > 0 ? `${gapCount} chỗ` : "0 chỗ"}
+            </span>{" "}
+            còn khoảng trống giờ.
           </p>
 
           {/* Bố cục máy tính: 2 bảng tách biệt */}

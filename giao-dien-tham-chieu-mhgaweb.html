@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Giao diện tham chiếu — Website quản lý Gallery</title>
+<style>
+/* ============================================================
+   BẢNG MÀU VÀ TOKEN THIẾT KẾ — DÙNG ĐÚNG CÁC GIÁ TRỊ NÀY
+   Claude Code: copy nguyên bảng biến này vào globals.css
+   ============================================================ */
+:root{
+  /* nền và chữ */
+  --bg:            #ffffff;
+  --surface-1:     #f5f5f4;   /* nền phụ: cột tên cửa hàng, thẻ, ô input */
+  --surface-2:     #ffffff;   /* nền chip */
+  --text-primary:  #1c1917;   /* chữ chính, tiêu đề */
+  --text-secondary:#57534e;   /* chữ phụ, mô tả */
+  --text-muted:    #a8a29e;   /* chữ mờ, placeholder, nhãn giờ */
+  --border:        #e7e5e4;   /* viền nhạt */
+  --border-strong: #a8a29e;   /* viền đậm ngăn cách cửa hàng */
+  --border-accent: #93c5fd;   /* viền chip do admin vá tay */
+
+  /* trạng thái ô lịch */
+  --bg-success:    #dcfce7;   /* ô XANH: đã có người */
+  --text-success:  #166534;
+  --bg-danger:     #fee2e2;   /* ô ĐỎ: còn trống */
+  --text-danger:   #991b1b;
+  --bg-warning:    #fef3c7;   /* ô VÀNG: cảnh báo */
+  --text-warning:  #92400e;
+  --bg-accent:     #dbeafe;   /* ô XANH DƯƠNG: ca của chính mình */
+  --text-accent:   #1e40af;
+
+  /* nút chính */
+  --fill-primary:  #1c1917;
+  --on-primary:    #fafaf9;
+
+  /* header bảng */
+  --bg-header:     #ede9fe;
+  --text-header:   #5b21b6;
+
+  --radius: 10px;
+}
+
+/* ============================================================
+   QUY TẮC CHUNG
+   - Font: SANS-SERIF cho toàn bộ. KHÔNG dùng serif ở bất kỳ đâu.
+   - Không dùng chữ in nghiêng cho nội dung.
+   - Nút bấm trên điện thoại: cao tối thiểu 44px.
+   ============================================================ */
+*{box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg); color:var(--text-primary);
+  margin:0; padding:24px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1{font-size:15px;font-weight:600;margin:0 0 4px}
+h2{font-size:13px;font-weight:600;margin:32px 0 8px}
+p.sub{font-size:11.5px;color:var(--text-secondary);margin:0 0 12px}
+.wrap{max-width:1100px;margin:0 auto}
+.note{font-size:11px;color:var(--text-muted);margin:0 0 10px}
+
+/* ---------- THANH ĐIỀU HƯỚNG / THANH BƯỚC ---------- */
+.navbar{display:flex;gap:6px;margin-bottom:14px}
+.navbar button{
+  flex:1;font-size:11.5px;padding:8px 4px;border:none;border-radius:8px;
+  background:var(--surface-1);color:var(--text-muted);cursor:pointer;
+  font-family:inherit;
+}
+.navbar button.active{background:var(--fill-primary);color:var(--on-primary)}
+
+/* ---------- Ô MENU TRANG CHỦ ---------- */
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:16px}
+.menu .item{
+  display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+  padding:14px;border-radius:var(--radius);background:var(--surface-1);
+  border:none;cursor:pointer;text-align:left;font-family:inherit;
+}
+.menu .item .label{font-size:12px;font-weight:500;color:var(--text-primary)}
+.menu .item.locked{
+  background:transparent;border:1px dashed var(--border);opacity:.6;cursor:default;
+}
+.menu .item.locked .label{color:var(--text-muted)}
+.menu .item .soon{font-size:10px;color:var(--text-muted)}
+.icon{width:18px;height:18px;color:var(--text-accent)}
+.menu .item.locked .icon{color:var(--text-muted)}
+
+/* ---------- KHỐI LỊCH CÁ NHÂN ---------- */
+.mine{background:var(--bg-accent);border-radius:var(--radius);padding:13px 16px;margin-bottom:16px}
+.mine .title{font-size:11.5px;color:var(--text-accent);font-weight:600;margin:0 0 4px}
+.mine .row{display:flex;gap:12px;padding:5px 0;border-top:1px solid rgba(30,64,175,.12)}
+.mine .day{flex:0 0 66px;font-size:11.5px;color:var(--text-accent);font-weight:600}
+.mine .val{font-size:11.5px;color:var(--text-accent)}
+.mine .off{font-size:11.5px;color:var(--text-muted);font-weight:600;letter-spacing:.5px}
+
+/* ---------- BẢNG LỊCH (dùng ở trang chủ, Bước 3, Bước 4) ---------- */
+table.sched{border-collapse:collapse;font-size:11px;width:100%;table-layout:fixed}
+table.sched th{
+  padding:6px 4px;background:var(--bg-header);color:var(--text-header);
+  font-weight:500;font-size:10px;
+}
+table.sched th.day{border-left:1.5px solid var(--border)}
+table.sched td{font-size:10px}
+/* cột tên cửa hàng và cột giờ */
+td.store{
+  padding:6px 4px;color:var(--text-primary);font-weight:600;
+  vertical-align:middle;background:var(--surface-1);
+}
+td.hour{
+  padding:6px 4px;color:var(--text-secondary);background:var(--surface-1);
+  white-space:nowrap;font-size:10px;
+}
+/* ô dữ liệu */
+td.cell{padding:6px 4px;text-align:center;vertical-align:middle;border-left:1.5px solid var(--border)}
+td.cell.filled{background:var(--bg-success);color:var(--text-success)}
+td.cell.empty {background:var(--bg-danger); color:var(--text-danger)}
+td.cell.mine  {background:var(--bg-accent); color:var(--text-accent);font-weight:700}
+/* đường ngăn cách giữa các cửa hàng: ĐẬM. Giữa các dòng ca: nhạt */
+tr.store-start td{border-top:2px solid var(--border-strong)}
+tr.store-row   td{border-top:1px solid var(--border)}
+
+/* ---------- BẢNG GÁN NGƯỜI (chip) ---------- */
+.chipbox{display:flex;flex-wrap:wrap;gap:2px;padding:3px;min-height:18px;border-radius:4px}
+.chipbox.has{background:var(--bg-success)}
+.chip{
+  display:inline-flex;align-items:center;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:10px;padding:1px 5px;
+  font-size:10px;color:var(--text-primary);
+}
+.chip.manual{border-color:var(--border-accent)}   /* ca do admin vá tay */
+.chip .x{cursor:pointer;color:var(--text-muted);margin-left:3px;font-size:11px}
+.addsel{font-size:10px;border:none;background:transparent;color:var(--text-muted);width:28px}
+
+/* ---------- LƯỚI ĐĂNG KÝ CỦA NHÂN VIÊN ---------- */
+table.reg{border-collapse:collapse;font-size:11px;width:100%;table-layout:fixed}
+table.reg th{padding:6px 4px;background:var(--bg-header);color:var(--text-header);font-weight:500;font-size:10px}
+table.reg td.slot{padding:5px 4px;color:var(--text-secondary);background:var(--surface-1);white-space:nowrap;border-top:1px solid var(--border)}
+table.reg td.pick{padding:2px;border-top:1px solid var(--border);border-left:1.5px solid var(--border)}
+button.slotbtn{
+  width:100%;height:30px;border:none;padding:0;font-size:11px;
+  background:var(--surface-1);color:var(--text-muted);cursor:pointer;font-family:inherit;
+}
+button.slotbtn.on     {background:var(--bg-success);color:var(--text-success)}
+button.slotbtn.invalid{background:var(--bg-danger); color:var(--text-danger)}
+tfoot td.sumlabel{padding:6px 4px;font-size:10px;color:var(--text-muted);border-top:2px solid var(--border-strong);background:var(--surface-1)}
+tfoot td.sum{padding:6px 3px;border-top:2px solid var(--border-strong);border-left:1.5px solid var(--border);font-size:10px;text-align:center;font-weight:600;color:var(--text-accent)}
+tfoot td.sum.bad{color:var(--text-danger)}
+tfoot td.sum.none{color:var(--text-muted);font-weight:400}
+
+/* ---------- NÚT LỚN ---------- */
+button.primary{
+  width:100%;min-height:44px;border:none;border-radius:8px;font-size:12.5px;
+  background:var(--fill-primary);color:var(--on-primary);cursor:pointer;
+  margin-top:14px;font-family:inherit;
+}
+button.primary:disabled{background:var(--surface-1);color:var(--text-muted);cursor:not-allowed}
+
+/* ---------- DẢI CẢNH BÁO ---------- */
+.banner{border-radius:var(--radius);padding:11px 16px;margin-bottom:12px;font-size:11.5px;line-height:1.6}
+.banner.danger {background:var(--bg-danger); color:var(--text-danger)}
+.banner.warning{background:var(--bg-warning);color:var(--text-warning)}
+.banner.success{background:var(--bg-success);color:var(--text-success)}
+
+/* ---------- BỐ CỤC ĐIỆN THOẠI ---------- */
+.phone{max-width:380px;margin:0 auto;border:1px solid var(--border);border-radius:14px;padding:14px 12px;background:var(--surface-1)}
+.phone .daycard{border-radius:10px;padding:10px 11px;margin-bottom:9px;background:#fff}
+.phone .daycard.invalid{outline:1.5px solid var(--text-danger)}
+.phone .daycard .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.phone .daycard .head .d{font-size:12px;font-weight:600;color:var(--text-primary)}
+.phone .daycard .head .v{font-size:11px;font-weight:600;color:var(--text-accent)}
+.phone .daycard .head .v.bad{color:var(--text-danger)}
+.phone .slotbig{
+  display:flex;align-items:center;justify-content:space-between;width:100%;
+  min-height:44px;margin-bottom:5px;padding:0 12px;border:none;border-radius:8px;
+  font-size:13px;background:var(--surface-1);color:var(--text-secondary);
+  cursor:pointer;font-family:inherit;
+}
+.phone .slotbig.on     {background:var(--bg-success);color:var(--text-success)}
+.phone .slotbig.invalid{background:var(--bg-danger); color:var(--text-danger)}
+.phone .errline{font-size:11px;color:var(--text-danger);margin:4px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="note">FILE NÀY LÀ CHUẨN GIAO DIỆN. Claude Code: đọc phần CSS ở đầu file, copy nguyên bảng biến màu vào dự án, và dựng các màn hình theo đúng cấu trúc HTML bên dưới. Không tự chọn màu hay font khác.</p>
+
+<!-- ================= 1. TRANG CHỦ ================= -->
+<h2>1 · Trang chủ (máy tính)</h2>
+
+<div class="navbar">
+  <button class="active">Trang chủ</button>
+  <button>Quản lý tài khoản</button>
+  <button>Đăng ký lịch làm việc</button>
+</div>
+
+<h1>Xin chào, Hiền</h1>
+<p class="sub">Admin · quản lý toàn hệ thống</p>
+
+<div class="menu">
+  <button class="item">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4"/></svg>
+    <span class="label">Đăng ký lịch làm việc</span>
+  </button>
+  <button class="item">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.9"/></svg>
+    <span class="label">Quản lý tài khoản</span>
+  </button>
+  <div class="item locked">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <span class="label">Đào tạo</span><span class="soon">Sắp có</span>
+  </div>
+  <div class="item locked">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <span class="label">Tra cứu thông tin tranh</span><span class="soon">Sắp có</span>
+  </div>
+</div>
+
+<div class="mine">
+  <p class="title">Lịch làm việc của bạn tuần này (6 ca)</p>
+  <div class="row"><span class="day">Thứ 2</span><span class="val">15-22h · 62 Hàng Trống</span></div>
+  <div class="row"><span class="day">Thứ 3</span><span class="val">15-22h · 62 Hàng Trống</span></div>
+  <div class="row"><span class="day">Thứ 4</span><span class="val">15-22h · 42 Hàng Ngang</span></div>
+  <div class="row"><span class="day">Thứ 5</span><span class="off">NGHỈ</span></div>
+  <div class="row"><span class="day">Thứ 6</span><span class="val">15-22h · 76 Hàng Gai</span></div>
+  <div class="row"><span class="day">Thứ 7</span><span class="val">15-22h · 62 Hàng Trống</span></div>
+  <div class="row"><span class="day">Chủ nhật</span><span class="val">15-22h · 76 Hàng Gai</span></div>
+</div>
+
+<!-- ================= 2. BẢNG LỊCH ================= -->
+<h2>2 · Bảng lịch — dùng chung ở trang chủ, Bước 3 (xem lại), Bước 4 (nháp)</h2>
+<p class="sub">
+  Cột "Giờ" là các LÁT CẮT sinh ra từ mọi mốc thời gian trong tuần của cửa hàng đó.
+  Ca dài trải nhiều lát thì gộp ô bằng rowspan, tên chỉ ghi một lần.
+  Ô xanh = có người · ô đỏ = trống, KHÔNG ghi chữ · ô xanh dương = ca của chính mình.
+</p>
+
+<table class="sched">
+  <colgroup><col style="width:88px"><col style="width:58px"><col><col><col><col><col><col><col></colgroup>
+  <thead>
+    <tr>
+      <th></th><th>Giờ</th>
+      <th class="day">T2</th><th class="day">T3</th><th class="day">T4</th>
+      <th class="day">T5</th><th class="day">T6</th><th class="day">T7</th><th class="day">CN</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="store-start">
+      <td class="store" rowspan="3">91 Hàng Gai</td>
+      <td class="hour">9-13h</td>
+      <td class="cell filled">Chi</td><td class="cell filled">Tuấn</td><td class="cell filled">Tuấn</td>
+      <td class="cell filled">Nhi</td><td class="cell filled">Thành</td><td class="cell filled">Thành</td>
+      <td class="cell empty"></td>
+    </tr>
+    <tr class="store-row">
+      <td class="hour">13-18h</td>
+      <td class="cell empty"></td><td class="cell filled">Linh</td><td class="cell filled">Linh</td>
+      <td class="cell filled">Linh</td><td class="cell filled">Tuấn</td><td class="cell filled">Phát</td>
+      <td class="cell filled">Chi</td>
+    </tr>
+    <tr class="store-row">
+      <td class="hour">18-22h</td>
+      <td class="cell filled">Hùng</td><td class="cell filled">Lan Anh</td><td class="cell filled">Nhi</td>
+      <td class="cell filled">Lan Anh</td><td class="cell filled">Nhi</td><td class="cell filled">Tú</td>
+      <td class="cell empty"></td>
+    </tr>
+
+    <tr class="store-start">
+      <td class="store" rowspan="2">76 Hàng Gai</td>
+      <td class="hour">9-15h</td>
+      <td class="cell filled">Yến</td><td class="cell filled">Yến</td><td class="cell filled">Nhân</td>
+      <td class="cell filled">Nhân</td><td class="cell filled">Dương</td><td class="cell filled">Chi</td>
+      <td class="cell filled">Hùng</td>
+    </tr>
+    <tr class="store-row">
+      <td class="hour">15-22h</td>
+      <td class="cell filled">Minh Anh</td><td class="cell filled">Dương</td><td class="cell filled">Phát</td>
+      <td class="cell filled">Thành</td><td class="cell mine">Hiền</td><td class="cell filled">Minh Anh</td>
+      <td class="cell mine">Hiền</td>
+    </tr>
+
+    <!-- ví dụ lát cắt lẻ: T2 có 9-13h + 15-22h → hở 13-15h -->
+    <tr class="store-start">
+      <td class="store" rowspan="4">62 Hàng Trống</td>
+      <td class="hour">9-13h</td>
+      <td class="cell filled">Tuấn</td>
+      <td class="cell filled" rowspan="2">Chi</td>
+      <td class="cell filled" rowspan="2">Yến</td>
+      <td class="cell filled" rowspan="2">Yến</td>
+      <td class="cell filled" rowspan="2">Phát</td>
+      <td class="cell filled">Tuấn</td>
+      <td class="cell empty" rowspan="2"></td>
+    </tr>
+    <tr class="store-row">
+      <td class="hour">13-15h</td>
+      <td class="cell empty"></td>
+      <td class="cell empty"></td>
+    </tr>
+    <tr class="store-row">
+      <td class="hour">15-18h</td>
+      <td class="cell mine" rowspan="2">Hiền</td>
+      <td class="cell mine" rowspan="2">Hiền</td>
+      <td class="cell filled" rowspan="2">Minh Anh</td>
+      <td class="cell filled" rowspan="2">Hùng</td>
+      <td class="cell empty"></td>
+      <td class="cell mine" rowspan="2">Hiền</td>
+      <td class="cell filled" rowspan="2">Lan Anh</td>
+    </tr>
+    <tr class="store-row">
+      <td class="hour">18-22h</td>
+      <td class="cell filled">Lan Anh</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ================= 3. BẢNG GÁN NGƯỜI ================= -->
+<h2>3 · Bảng gán người (Bước 3) — chip có nút ×, dropdown "+", dòng "Khác"</h2>
+
+<table class="sched">
+  <colgroup><col style="width:80px"><col style="width:54px"><col><col><col><col><col><col><col></colgroup>
+  <thead>
+    <tr><th></th><th></th>
+      <th class="day">T2</th><th class="day">T3</th><th class="day">T4</th>
+      <th class="day">T5</th><th class="day">T6</th><th class="day">T7</th><th class="day">CN</th></tr>
+  </thead>
+  <tbody>
+    <tr class="store-start">
+      <td class="store" rowspan="4">91 Hàng Gai</td>
+      <td class="hour">9-13h</td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Chi<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Tuấn<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Nhi<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Thành<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+    </tr>
+    <tr class="store-row">
+      <td class="hour">13-18h</td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Linh<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Linh<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Tuấn<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Chi<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+    </tr>
+    <tr class="store-row">
+      <td class="hour">18-22h</td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Hùng<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Nhi<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip">Tú<span class="x">×</span></span><select class="addsel"><option>+</option></select></div></td>
+      <td class="cell"><div class="chipbox"><select class="addsel"><option>+</option></select></div></td>
+    </tr>
+    <!-- dòng "Khác": chỉ chứa ca lẻ do admin vá tay, chip có viền màu, KHÔNG có dropdown + -->
+    <tr class="store-row">
+      <td class="hour">Khác</td>
+      <td class="cell"><div class="chipbox"></div></td>
+      <td class="cell"><div class="chipbox has"><span class="chip manual">Phát 15-18h<span class="x">×</span></span></div></td>
+      <td class="cell"><div class="chipbox"></div></td>
+      <td class="cell"><div class="chipbox"></div></td>
+      <td class="cell"><div class="chipbox"></div></td>
+      <td class="cell"><div class="chipbox"></div></td>
+      <td class="cell"><div class="chipbox"></div></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ================= 4. TRANG ĐĂNG KÝ NHÂN VIÊN ================= -->
+<h2>4 · Trang đăng ký của nhân viên (máy tính)</h2>
+<p class="sub">4 khoảng giờ × 7 ngày. Ô đã chọn xanh có ✓. Ngày không hợp lệ thì ô chuyển đỏ với dấu !, cột dưới ghi "Chưa hợp lệ".</p>
+
+<table class="reg">
+  <colgroup><col style="width:62px"><col><col><col><col><col><col><col></colgroup>
+  <thead>
+    <tr><th style="text-align:left">Giờ</th>
+      <th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="slot">9-13h</td>
+      <td class="pick"><button class="slotbtn on">✓</button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn invalid">!</button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn on">✓</button></td>
+    </tr>
+    <tr>
+      <td class="slot">13-15h</td>
+      <td class="pick"><button class="slotbtn on">✓</button></td>
+      <td class="pick"><button class="slotbtn invalid">!</button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+    </tr>
+    <tr>
+      <td class="slot">15-18h</td>
+      <td class="pick"><button class="slotbtn on">✓</button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn invalid">!</button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn on">✓</button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+    </tr>
+    <tr>
+      <td class="slot">18-22h</td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn on">✓</button></td>
+      <td class="pick"><button class="slotbtn"></button></td>
+      <td class="pick"><button class="slotbtn on">✓</button></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td class="sumlabel">Có thể làm</td>
+      <td class="sum">9-18h</td>
+      <td class="sum bad">Chưa hợp lệ</td>
+      <td class="sum bad">Chưa hợp lệ</td>
+      <td class="sum none">—</td>
+      <td class="sum">15-22h</td>
+      <td class="sum none">—</td>
+      <td class="sum">9-13h · 18-22h</td>
+    </tr>
+  </tfoot>
+</table>
+
+<button class="primary" disabled>Sửa các ngày chưa hợp lệ để lưu</button>
+
+<!-- ================= 5. BỐ CỤC ĐIỆN THOẠI ================= -->
+<h2>5 · Trang đăng ký — bố cục điện thoại</h2>
+<p class="sub">Mỗi ngày một thẻ, 4 nút khoảng giờ xếp dọc, mỗi nút cao 44px. Cảnh báo lỗi nằm NGAY TRONG thẻ, không gom xuống cuối trang.</p>
+
+<div class="phone">
+  <h1 style="font-size:13px">Đăng ký cho tuần 19 - 25/08</h1>
+  <p style="font-size:11px;color:var(--text-warning);margin:2px 0 12px">Còn 3 ngày nữa hết hạn (hết Thứ 7)</p>
+
+  <div class="daycard">
+    <div class="head"><span class="d">Thứ 2 · 19/08</span><span class="v">9-18h</span></div>
+    <button class="slotbig on"><span>9h - 13h</span><span>✓</span></button>
+    <button class="slotbig on"><span>13h - 15h</span><span>✓</span></button>
+    <button class="slotbig on"><span>15h - 18h</span><span>✓</span></button>
+    <button class="slotbig"><span>18h - 22h</span><span></span></button>
+  </div>
+
+  <div class="daycard invalid">
+    <div class="head"><span class="d">Thứ 3 · 20/08</span><span class="v bad">Chưa hợp lệ</span></div>
+    <button class="slotbig"><span>9h - 13h</span><span></span></button>
+    <button class="slotbig invalid"><span>13h - 15h</span><span>!</span></button>
+    <button class="slotbig"><span>15h - 18h</span><span></span></button>
+    <button class="slotbig invalid"><span>18h - 22h</span><span>!</span></button>
+    <p class="errline">Khoảng này chưa ghép được thành ca</p>
+  </div>
+
+  <button class="primary" disabled>Sửa các ngày chưa hợp lệ để lưu</button>
+</div>
+
+<!-- ================= 6. DẢI CẢNH BÁO ================= -->
+<h2>6 · Dải cảnh báo</h2>
+<div class="banner danger"><strong>Còn 18 giờ chưa có người.</strong> Bấm vào ô đỏ để điền tên.</div>
+<div class="banner warning"><strong>Chạy lại sẽ xoá toàn bộ chỉnh sửa tay</strong> — bạn đang có 3 ca vá tay.</div>
+<div class="banner success">Đã công bố. Toàn bộ tài khoản sẽ thấy lịch này trên trang chủ.</div>
+
+</div>
+</body>
+</html>

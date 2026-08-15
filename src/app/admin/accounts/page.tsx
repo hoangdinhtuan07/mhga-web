@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/supabase/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { AppHeader } from "@/components/schedule/app-header";
 import { AccountsTable, type AccountRow } from "./accounts-table";
 
 export default async function AccountsPage() {
@@ -21,10 +22,12 @@ export default async function AccountsPage() {
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 p-4 md:p-8">
+      <AppHeader role="admin" active="accounts" />
+
       <div className="space-y-1">
         <h1 className="text-xl font-semibold">Quản lý tài khoản</h1>
         <p className="text-sm text-muted-foreground">
-          Tổng {total} tài khoản · {activeCount} đang làm · {adminCount} admin
+          {total} tài khoản · {activeCount} đang làm · {adminCount} admin
         </p>
       </div>
 

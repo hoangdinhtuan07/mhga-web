@@ -47,30 +47,30 @@ export function ScheduleWizard({
       </h1>
 
       {isPublished && (
-        <p className="rounded-md border border-primary/30 bg-primary/10 p-3 text-sm">
+        <p className="rounded-[var(--radius)] bg-[var(--bg-success)] p-4 text-sm text-[var(--text-success)]">
           ✓ Lịch tuần {weekLabel} đã được công bố — nhân viên đã thấy lịch
           này trên trang chủ. Các bảng nháp bên dưới trống vì mọi ca đã
           chuyển sang chính thức, không phải bị xoá.
         </p>
       )}
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 gap-1.5 sm:flex">
         {STEPS.map((s) => (
           <button
             key={s.id}
             type="button"
             onClick={() => setStep(s.id)}
             className={cn(
-              "flex h-11 flex-col items-center justify-center rounded-md border px-1 text-center text-xs font-medium transition-colors md:h-14 md:text-sm",
+              "flex h-11 items-center justify-center rounded-lg px-3 text-center text-xs font-medium transition-colors sm:flex-1 sm:text-sm",
               step === s.id
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-input hover:bg-muted",
+                ? "bg-[var(--fill-primary)] text-[var(--on-primary)]"
+                : "bg-[var(--surface-1)] text-[var(--text-muted)] hover:text-[var(--text-primary)]",
             )}
           >
-            <span className="md:hidden">
+            <span className="sm:hidden">
               {s.id} {s.shortLabel}
             </span>
-            <span className="hidden md:inline">
+            <span className="hidden sm:inline">
               {s.id}. {s.fullLabel}
             </span>
           </button>
@@ -78,14 +78,18 @@ export function ScheduleWizard({
       </div>
 
       {step === 1 && (
-        <RegistrationOverviewTable weekDays={weekDays} employees={employees} />
+        <RegistrationOverviewTable
+          weekDays={weekDays}
+          employees={employees}
+          onContinue={() => setStep(2)}
+        />
       )}
       {step === 2 && (
         <SuggestionStep
           weekStart={weekStart}
           weekLabel={weekLabel}
-          stores={stores}
           assignments={assignments}
+          onContinue={() => setStep(3)}
         />
       )}
       {step === 3 && (

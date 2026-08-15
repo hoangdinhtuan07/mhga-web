@@ -1,36 +1,63 @@
 import Link from "next/link";
+import { Lock, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type HomeMenuItem = { label: string; href?: string; locked: boolean };
+export type HomeMenuItem = {
+  label: string;
+  href?: string;
+  locked: boolean;
+  icon: LucideIcon;
+};
 
-// Mục 4.2/4.3: mục mở khoá có nền + màu; mục khoá viền nét đứt + 🔒 + "Sắp
-// có". Lưới tự xếp dọc trên điện thoại, nhiều cột trên máy tính — không
-// cần 2 khối JSX riêng vì đây vốn chỉ là lưới thẻ, tự nhiên reflow theo bề
-// rộng màn hình (mục 9).
+// Khớp .menu trong giao-dien-tham-chieu-mhgaweb.html: mục mở khoá nền
+// surface-1, icon màu text-accent; mục khoá nền trong suốt, viền nét đứt
+// border, icon+chữ text-muted, kèm "Sắp có".
 export function HomeMenu({ items }: { items: HomeMenuItem[] }) {
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-      {items.map((item) =>
-        item.locked ? (
-          <div
-            key={item.label}
-            className="flex h-16 flex-col items-center justify-center gap-0.5 rounded-md border border-dashed text-sm text-muted-foreground"
-          >
-            <span>🔒 {item.label}</span>
-            <span className="text-xs">Sắp có</span>
-          </div>
-        ) : (
+      {items.map((item) => {
+        const Icon = item.locked ? Lock : item.icon;
+        const content = (
+          <>
+            <Icon
+              size={18}
+              className={item.locked ? "text-[var(--text-muted)]" : "text-[var(--text-accent)]"}
+            />
+            <span
+              className={cn(
+                "text-xs font-medium",
+                item.locked ? "text-[var(--text-muted)]" : "text-[var(--text-primary)]",
+              )}
+            >
+              {item.label}
+            </span>
+            {item.locked && (
+              <span className="text-[10px] text-[var(--text-muted)]">Sắp có</span>
+            )}
+          </>
+        );
+
+        if (item.locked) {
+          return (
+            <div
+              key={item.label}
+              className="flex flex-col items-start gap-1.5 rounded-[var(--radius)] border border-dashed border-[var(--border)] p-3.5 opacity-60"
+            >
+              {content}
+            </div>
+          );
+        }
+
+        return (
           <Link
             key={item.label}
             href={item.href!}
-            className={cn(
-              "flex h-16 flex-col items-center justify-center rounded-md border bg-primary/10 text-sm font-medium text-primary hover:bg-primary/20",
-            )}
+            className="flex flex-col items-start gap-1.5 rounded-[var(--radius)] bg-[var(--surface-1)] p-3.5 hover:opacity-80"
           >
-            {item.label}
+            {content}
           </Link>
-        ),
-      )}
+        );
+      })}
     </div>
   );
 }

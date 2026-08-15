@@ -12,27 +12,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { ScheduleAssignment } from "@/lib/schedule/assignment";
-import type { StoreDef } from "./assignment-table";
 import { runSuggestion } from "./actions";
-
-const SHIFT_LABELS: Record<number, string> = {
-  1: "9-13h",
-  2: "13-18h",
-  3: "18-22h",
-  4: "9-15h",
-  5: "15-22h",
-};
 
 export function SuggestionStep({
   weekStart,
   weekLabel,
-  stores,
   assignments,
+  onContinue,
 }: {
   weekStart: string;
   weekLabel: string;
-  stores: StoreDef[];
   assignments: ScheduleAssignment[];
+  onContinue?: () => void;
 }) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -67,38 +58,56 @@ export function SuggestionStep({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2 rounded-md border p-4">
-        <p className="text-sm font-medium">Cấu hình ca theo cửa hàng</p>
-        <ul className="hidden space-y-1 text-sm text-muted-foreground md:block">
-          {stores.map((store) => (
-            <li key={store.id}>
-              {store.name}: {store.allowedShiftIds.map((id) => SHIFT_LABELS[id]).join(", ")}
-            </li>
-          ))}
-        </ul>
-        <div className="space-y-1 text-sm text-muted-foreground md:hidden">
-          <p>91 &amp; 15 Hàng Gai: 3 ca nhỏ (9-13h, 13-18h, 18-22h)</p>
-          <p>76 Hàng Gai, 62 Hàng Trống, 42 Hàng Ngang: 2 ca lớn (9-15h, 15-22h) + ca nhỏ</p>
-        </div>
+      <div>
+        <h2 className="font-semibold">Bước 2 — Tạo gợi ý lịch tự động</h2>
+      </div>
+
+      <div className="space-y-1">
+        <p className="text-sm font-medium">Cấu hình ca</p>
+        <p className="text-sm text-[var(--text-muted)]">
+          91 &amp; 15 Hàng Gai — chỉ 3 ca nhỏ: 9-13h, 13-18h, 18-22h
+        </p>
+        <p className="text-sm text-[var(--text-muted)]">
+          76 Hàng Gai, 62 Hàng Trống, 42 Hàng Ngang — 2 ca lớn, nhận thêm ca nhỏ
+        </p>
       </div>
 
       {error && (
-        <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+        <p
+          role="alert"
+          className="rounded-[var(--radius)] bg-[var(--bg-danger)] p-4 text-sm text-[var(--text-danger)]"
+        >
           {error}
         </p>
       )}
 
-      <Button className="h-11 w-full md:w-auto" onClick={handleClickRun} disabled={isPending}>
+      <Button
+        className="h-12 w-full rounded-lg text-base"
+        onClick={handleClickRun}
+        disabled={isPending}
+      >
         {isPending ? "Đang chạy..." : `Chạy gợi ý cho tuần ${weekLabel}`}
       </Button>
 
       {log && (
-        <div className="space-y-1 rounded-md border p-4 font-mono text-xs">
+        <div className="space-y-2 text-sm">
           {log.map((line, i) => (
-            <p key={i}>{line}</p>
+            <p key={i}>{line.startsWith("✓") ? line : <strong>{line}</strong>}</p>
           ))}
-          {warning && <p className="text-destructive">{warning}</p>}
+          {warning ? (
+            <p className="font-semibold text-[var(--text-danger)]">{warning}</p>
+          ) : (
+            <p className="font-semibold text-[var(--text-success)]">
+              Đã phủ kín toàn bộ khung giờ mở cửa.
+            </p>
+          )}
         </div>
+      )}
+
+      {log && onContinue && (
+        <Button className="h-12 w-full rounded-lg text-base" onClick={onContinue}>
+          Xem &amp; chỉnh lịch →
+        </Button>
       )}
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>

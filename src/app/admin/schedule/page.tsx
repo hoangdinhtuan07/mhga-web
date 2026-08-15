@@ -10,6 +10,7 @@ import {
 } from "@/lib/schedule/week";
 import { slotsFromRanges, type DaySelection } from "@/lib/schedule/registration";
 import type { ScheduleAssignment } from "@/lib/schedule/assignment";
+import { AppHeader } from "@/components/schedule/app-header";
 import { ScheduleWizard } from "./schedule-wizard";
 import type { EmployeeRegistration } from "./registration-overview-table";
 import type { StoreDef } from "./assignment-table";
@@ -107,6 +108,7 @@ export default async function AdminSchedulePage() {
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 p-4 md:p-8">
+      <AppHeader role="admin" active="schedule" />
       <ScheduleWizard
         weekStart={weekStart}
         weekLabel={weekLabel}

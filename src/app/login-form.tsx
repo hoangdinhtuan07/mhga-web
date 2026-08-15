@@ -82,7 +82,7 @@ export function LoginForm() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
       <div className="w-full max-w-sm space-y-4">
-        <div className="rounded-lg border bg-background p-6 shadow-sm">
+        <div className="rounded-[var(--radius)] border bg-background p-6 shadow-sm">
           <h1 className="mb-6 text-xl font-semibold">Đăng nhập</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -140,7 +140,7 @@ export function LoginForm() {
               </p>
             )}
 
-            <Button type="submit" className="h-11 w-full" disabled={loading}>
+            <Button type="submit" className="h-11 w-full rounded-lg" disabled={loading}>
               {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
           </form>

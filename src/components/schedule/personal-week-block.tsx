@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import type { ScheduleAssignment } from "@/lib/schedule/assignment";
 
 const WEEKDAY_LABELS = [
@@ -10,14 +11,8 @@ const WEEKDAY_LABELS = [
   "Chủ nhật",
 ];
 
-function formatDayShort(dateKey: string) {
-  const [, m, d] = dateKey.split("-");
-  return `${d}/${m}`;
-}
-
-// Mục 4.2 + 2.7: liệt kê đủ 7 ngày, ngày không có ca ghi NGHỈ (không bỏ
-// trống) — quét mắt nhanh hơn nhiều so với chỉ liệt kê ngày có ca. Danh
-// sách dọc dùng chung được cho cả máy tính lẫn điện thoại (mục 9).
+// Khớp .mine trong giao-dien-tham-chieu-mhgaweb.html: nền bg-accent, hàng
+// xếp trái (tên thứ cột cố định rồi tới nội dung), không dàn 2 đầu.
 export function PersonalWeekBlock({
   weekDays,
   assignments,
@@ -40,34 +35,37 @@ export function PersonalWeekBlock({
   const totalShifts = byDay.reduce((sum, d) => sum + d.shifts.length, 0);
 
   return (
-    <div className="space-y-2 rounded-md border p-4">
-      <h2 className="font-medium">
-        Lịch làm việc của bạn tuần này · {totalShifts} ca
-      </h2>
-      <ul className="divide-y">
-        {byDay.map(({ day, label, shifts }) => (
-          <li
-            key={day}
-            className="flex flex-wrap items-baseline justify-between gap-x-3 py-1.5 text-sm"
-          >
-            <span className="font-medium">
-              {label} {formatDayShort(day)}
+    <div className="rounded-[var(--radius)] bg-[var(--bg-accent)] px-4 py-3.5">
+      <p className="mb-1 text-sm font-semibold text-[var(--text-accent)]">
+        Lịch làm việc của bạn tuần này ({totalShifts} ca)
+      </p>
+      {byDay.map(({ day, label, shifts }, i) => (
+        <div
+          key={day}
+          className={cn(
+            "flex gap-3 py-1.5 text-sm",
+            i > 0 && "border-t border-t-[rgba(30,64,175,0.12)]",
+          )}
+        >
+          <span className="w-16 shrink-0 font-semibold text-[var(--text-accent)]">
+            {label}
+          </span>
+          {shifts.length === 0 ? (
+            <span className="font-semibold tracking-wide text-[var(--text-muted)]">
+              NGHỈ
             </span>
-            {shifts.length === 0 ? (
-              <span className="text-muted-foreground">NGHỈ</span>
-            ) : (
-              <span className="text-right text-muted-foreground">
-                {shifts
-                  .map(
-                    (s) =>
-                      `${s.startHour}-${s.endHour}h · ${storesById[s.storeId] ?? "?"}`,
-                  )
-                  .join(", ")}
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
+          ) : (
+            <span className="text-[var(--text-accent)]">
+              {shifts
+                .map(
+                  (s) =>
+                    `${s.startHour}-${s.endHour}h · ${storesById[s.storeId] ?? "?"}`,
+                )
+                .join(", ")}
+            </span>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

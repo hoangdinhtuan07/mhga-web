@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -15,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AccountFormDialog } from "./account-form-dialog";
 import { DeleteAccountDialog } from "./delete-account-dialog";
+import { TABLE_HEADER_CELL, TABLE_HEADER_ROW } from "@/lib/schedule/table-styles";
 
 export type AccountRow = {
   id: string;
@@ -25,18 +25,44 @@ export type AccountRow = {
 };
 
 function RoleBadge({ role }: { role: AccountRow["role"] }) {
+  if (role === "staff") {
+    return <span className="text-sm">Nhân viên</span>;
+  }
   return (
-    <Badge variant={role === "admin" ? "default" : "secondary"}>
-      {role === "admin" ? "Admin" : "Nhân viên"}
-    </Badge>
+    <span className="inline-flex items-center rounded-full bg-[var(--bg-accent)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-accent)]">
+      Admin
+    </span>
   );
 }
 
-function StatusBadge({ status }: { status: AccountRow["status"] }) {
+function StatusText({ status }: { status: AccountRow["status"] }) {
   return (
-    <Badge variant={status === "active" ? "default" : "secondary"}>
+    <span
+      className={cn(
+        "text-sm font-medium",
+        status === "active" ? "text-[var(--text-success)]" : "text-[var(--text-muted)]",
+      )}
+    >
       {status === "active" ? "Đang làm" : "Đã nghỉ"}
-    </Badge>
+    </span>
+  );
+}
+
+function PillButton({
+  tone = "default",
+  ...props
+}: Omit<ComponentProps<typeof Button>, "variant"> & { tone?: "default" | "danger" }) {
+  return (
+    <Button
+      {...props}
+      variant="outline"
+      size="sm"
+      className={cn(
+        "rounded-full border-[var(--border)]",
+        tone === "danger" && "border-[var(--text-danger)]/40 text-[var(--text-danger)] hover:bg-[var(--bg-danger)]",
+        props.className,
+      )}
+    />
   );
 }
 
@@ -82,38 +108,50 @@ export function AccountsTable({
       {error && (
         <p
           role="alert"
-          className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+          className="rounded-[var(--radius)] bg-[var(--bg-danger)] p-3 text-sm text-[var(--text-danger)]"
         >
           {error}
         </p>
       )}
 
-      <div className="flex justify-end">
-        <Button className="h-11" onClick={() => setFormTarget("new")}>
-          + Thêm tài khoản
-        </Button>
-      </div>
+      <Button className="h-11 rounded-lg" onClick={() => setFormTarget("new")}>
+        + Thêm tài khoản
+      </Button>
+
+      {formTarget && (
+        <AccountFormDialog
+          account={formTarget === "new" ? null : formTarget}
+          onClose={() => setFormTarget(null)}
+          onSaved={() => {
+            setFormTarget(null);
+            refresh();
+          }}
+        />
+      )}
 
       {/* Bố cục máy tính */}
-      <div className="hidden overflow-x-auto rounded-md border md:block">
+      <div className="hidden overflow-x-auto rounded-[var(--radius)] border border-[var(--border)] md:block">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Tên hiển thị</TableHead>
-              <TableHead>Tên đăng nhập</TableHead>
-              <TableHead>Vai trò</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead className="text-right">Thao tác</TableHead>
+            <TableRow className={cn(TABLE_HEADER_ROW, "hover:bg-[var(--bg-header)]")}>
+              <TableHead className={TABLE_HEADER_CELL}>Tên hiển thị</TableHead>
+              <TableHead className={TABLE_HEADER_CELL}>Đăng nhập</TableHead>
+              <TableHead className={TABLE_HEADER_CELL}>Vai trò</TableHead>
+              <TableHead className={TABLE_HEADER_CELL}>Trạng thái</TableHead>
+              <TableHead className={cn("text-right", TABLE_HEADER_CELL)}>Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {accounts.map((account) => (
               <TableRow
                 key={account.id}
-                className={cn(account.status === "inactive" && "opacity-50")}
+                className={cn(account.status === "inactive" && "opacity-60")}
               >
                 <TableCell className="font-medium">
                   {account.display_name}
+                  {account.id === currentUserId && (
+                    <span className="text-muted-foreground"> (bạn)</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {account.username}
@@ -122,20 +160,12 @@ export function AccountsTable({
                   <RoleBadge role={account.role} />
                 </TableCell>
                 <TableCell>
-                  <StatusBadge status={account.status} />
+                  <StatusText status={account.status} />
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFormTarget(account)}
-                    >
-                      Sửa
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <PillButton onClick={() => setFormTarget(account)}>Sửa</PillButton>
+                    <PillButton
                       disabled={
                         account.id === currentUserId ||
                         pendingId === account.id
@@ -144,16 +174,15 @@ export function AccountsTable({
                     >
                       {account.status === "active"
                         ? "Cho nghỉ"
-                        : "Kích hoạt lại"}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
+                        : "Cho làm lại"}
+                    </PillButton>
+                    <PillButton
+                      tone="danger"
                       disabled={account.id === currentUserId}
                       onClick={() => setDeleteTarget(account)}
                     >
                       Xoá
-                    </Button>
+                    </PillButton>
                   </div>
                 </TableCell>
               </TableRow>
@@ -168,8 +197,8 @@ export function AccountsTable({
           <div
             key={account.id}
             className={cn(
-              "space-y-3 rounded-lg border p-4",
-              account.status === "inactive" && "opacity-50",
+              "space-y-3 rounded-[var(--radius)] border p-4",
+              account.status === "inactive" && "opacity-60",
             )}
           >
             <div className="flex items-start justify-between gap-2">
@@ -181,50 +210,34 @@ export function AccountsTable({
               </div>
               <div className="flex flex-col items-end gap-1">
                 <RoleBadge role={account.role} />
-                <StatusBadge status={account.status} />
+                <StatusText status={account.status} />
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                className="h-11 flex-1"
-                onClick={() => setFormTarget(account)}
-              >
+              <PillButton className="h-11 flex-1" onClick={() => setFormTarget(account)}>
                 Sửa
-              </Button>
-              <Button
-                variant="outline"
+              </PillButton>
+              <PillButton
                 className="h-11 flex-1"
                 disabled={
                   account.id === currentUserId || pendingId === account.id
                 }
                 onClick={() => handleToggleStatus(account)}
               >
-                {account.status === "active" ? "Cho nghỉ" : "Kích hoạt lại"}
-              </Button>
-              <Button
-                variant="destructive"
+                {account.status === "active" ? "Cho nghỉ" : "Cho làm lại"}
+              </PillButton>
+              <PillButton
+                tone="danger"
                 className="h-11 flex-1"
                 disabled={account.id === currentUserId}
                 onClick={() => setDeleteTarget(account)}
               >
                 Xoá
-              </Button>
+              </PillButton>
             </div>
           </div>
         ))}
       </div>
-
-      {formTarget && (
-        <AccountFormDialog
-          account={formTarget === "new" ? null : formTarget}
-          onClose={() => setFormTarget(null)}
-          onSaved={() => {
-            setFormTarget(null);
-            refresh();
-          }}
-        />
-      )}
 
       {deleteTarget && (
         <DeleteAccountDialog

@@ -11,6 +11,7 @@ import {
   toDateKey,
 } from "@/lib/schedule/week";
 import { slotsFromRanges, type DaySelection } from "@/lib/schedule/registration";
+import { AppHeader } from "@/components/schedule/app-header";
 import { RegistrationGrid } from "./registration-grid";
 
 export default async function RegisterPage() {
@@ -51,6 +52,7 @@ export default async function RegisterPage() {
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-4 md:p-8">
+      <AppHeader role={profile.role} active="register" />
       <RegistrationGrid
         weekDays={weekDays}
         weekLabel={weekLabel}

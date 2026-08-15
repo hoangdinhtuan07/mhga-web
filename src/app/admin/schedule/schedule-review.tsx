@@ -11,21 +11,17 @@ import {
 import type { EmployeeRegistration } from "./registration-overview-table";
 import type { StoreDef } from "./assignment-table";
 import { patchGap, unassignShift } from "./actions";
+import {
+  HOUR_CELL,
+  STORE_CELL,
+  STORE_ROW,
+  STORE_START_ROW,
+  TABLE_HEADER_CELL,
+  TABLE_HEADER_DAY,
+  TABLE_HEADER_ROW,
+} from "@/lib/schedule/table-styles";
 
-const WEEKDAY_LABELS = [
-  "Thứ 2",
-  "Thứ 3",
-  "Thứ 4",
-  "Thứ 5",
-  "Thứ 6",
-  "Thứ 7",
-  "Chủ nhật",
-];
-
-function formatDayShort(dateKey: string) {
-  const [, m, d] = dateKey.split("-");
-  return `${d}/${m}`;
-}
+const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 type SelectedGap = {
   storeId: number;
@@ -80,7 +76,7 @@ function PersonWithRemove({
         type="button"
         disabled={disabled}
         onClick={onRemove}
-        className="text-muted-foreground hover:text-destructive disabled:opacity-50"
+        className="text-[var(--text-muted)] hover:text-[var(--text-danger)] disabled:opacity-50"
         aria-label={`Bỏ ${person.displayName}`}
       >
         ×
@@ -161,36 +157,34 @@ export function ScheduleReview({
 
   return (
     <div className="space-y-4">
-      <h2 className="font-medium">Bảng xem lại</h2>
+      <div>
+        <h2 className="font-medium">Bảng xem lại</h2>
+        <p className="text-sm text-[var(--text-muted)]">
+          Bấm ô đỏ để vá tay, × để bỏ người đã vá
+        </p>
+      </div>
 
       {error && (
         <p
           role="alert"
-          className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+          className="rounded-[var(--radius)] bg-[var(--bg-danger)] p-4 text-sm text-[var(--text-danger)]"
         >
           {error}
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-md border">
-        <table className="w-full border-collapse text-sm">
+      <div className="overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
+        <table className="w-full border-collapse text-[11px]">
           <thead>
-            <tr>
-              <th className="border-b border-r bg-muted/40 p-2 text-left font-medium">
-                Cửa hàng
-              </th>
-              <th className="border-b border-r bg-muted/20 p-2 text-left font-medium">
-                Mốc giờ
-              </th>
+            <tr className={TABLE_HEADER_ROW}>
+              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Cửa hàng</th>
+              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Giờ</th>
               {weekDays.map((day, i) => (
                 <th
                   key={day}
-                  className="border-b border-l p-2 text-center font-medium"
+                  className={cn("p-2 text-center", TABLE_HEADER_CELL, TABLE_HEADER_DAY)}
                 >
-                  <div>{WEEKDAY_LABELS[i]}</div>
-                  <div className="text-xs font-normal text-muted-foreground">
-                    {formatDayShort(day)}
-                  </div>
+                  {WEEKDAY_LABELS[i]}
                 </th>
               ))}
             </tr>
@@ -210,17 +204,14 @@ export function ScheduleReview({
                   {slices.map((slice, sliceIndex) => (
                     <tr
                       key={`${slice.start}-${slice.end}`}
-                      className={sliceIndex === 0 ? "border-t-4 border-t-foreground/20" : ""}
+                      className={sliceIndex === 0 ? STORE_START_ROW : STORE_ROW}
                     >
                       {sliceIndex === 0 && (
-                        <td
-                          rowSpan={slices.length}
-                          className="border-r bg-muted/40 p-2 align-top font-medium"
-                        >
+                        <td rowSpan={slices.length} className={cn("p-2 align-middle", STORE_CELL)}>
                           {store.name}
                         </td>
                       )}
-                      <td className="border-r bg-muted/20 p-2 text-xs whitespace-nowrap">
+                      <td className={cn("p-2 whitespace-nowrap", HOUR_CELL)}>
                         {slice.start}-{slice.end}h
                       </td>
                       {weekDays.map((day) => {
@@ -241,15 +232,16 @@ export function ScheduleReview({
                             key={day}
                             rowSpan={segment.sliceCount}
                             className={cn(
-                              "border-l p-1.5 align-top text-xs",
-                              isRed && "bg-destructive/10",
-                              isSelected && "ring-2 ring-inset ring-primary",
+                              "border-l-[1.5px] border-l-[var(--border)] p-2 text-center",
+                              isRed && "bg-[var(--bg-danger)]",
+                              !isRed && "bg-[var(--bg-success)]",
+                              isSelected && "ring-2 ring-inset ring-[var(--text-accent)]",
                             )}
                           >
                             {isRed ? (
                               <button
                                 type="button"
-                                className="w-full rounded px-1 py-1 text-center text-destructive hover:underline"
+                                className="w-full rounded px-1 py-1 text-center text-[var(--text-danger)] hover:underline"
                                 onClick={() =>
                                   setSelectedGap({
                                     storeId: store.id,
@@ -268,7 +260,7 @@ export function ScheduleReview({
                                 />
                               </button>
                             ) : (
-                              <div className="flex flex-wrap gap-x-1">
+                              <div className="flex flex-wrap justify-center gap-x-1 text-[var(--text-success)]">
                                 {segment.people.map((person, idx) => {
                                   const id = findAssignmentId(
                                     person.id,
@@ -302,14 +294,14 @@ export function ScheduleReview({
       </div>
 
       {selectedGap && gapSuggestions && (
-        <div className="space-y-3 rounded-md border p-4">
+        <div className="space-y-3 rounded-[var(--radius)] border border-[var(--border)] p-4">
           <div className="flex items-center justify-between">
             <p className="font-medium">
               {selectedGap.storeName} · {selectedGap.start}-{selectedGap.end}h
             </p>
             <button
               type="button"
-              className="text-sm text-muted-foreground hover:underline"
+              className="text-sm text-[var(--text-muted)] hover:underline"
               onClick={() => setSelectedGap(null)}
             >
               Đóng
@@ -318,14 +310,14 @@ export function ScheduleReview({
 
           {gapSuggestions.fullyAvailable.length === 0 &&
             gapSuggestions.partial.length === 0 && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[var(--text-muted)]">
                 Không còn ai rảnh khung giờ này.
               </p>
             )}
 
           {gapSuggestions.fullyAvailable.length > 0 && (
             <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">
+              <p className="text-xs font-medium text-[var(--text-muted)]">
                 Rảnh trọn khung
               </p>
               <div className="flex flex-wrap gap-2">
@@ -337,7 +329,7 @@ export function ScheduleReview({
                     onClick={() =>
                       handlePick(emp.id, selectedGap.start, selectedGap.end)
                     }
-                    className="h-9 rounded-md border px-3 text-sm hover:bg-muted disabled:opacity-50"
+                    className="h-9 rounded-full border px-3 text-sm hover:bg-muted disabled:opacity-50"
                   >
                     {emp.displayName}
                   </button>
@@ -348,7 +340,7 @@ export function ScheduleReview({
 
           {gapSuggestions.partial.length > 0 && (
             <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">
+              <p className="text-xs font-medium text-[var(--text-muted)]">
                 Vá được một phần
               </p>
               <div className="flex flex-wrap gap-2">
@@ -358,7 +350,7 @@ export function ScheduleReview({
                     type="button"
                     disabled={isPending}
                     onClick={() => handlePick(emp.id, coverStart, coverEnd)}
-                    className="h-9 rounded-md border px-3 text-sm hover:bg-muted disabled:opacity-50"
+                    className="h-9 rounded-full border px-3 text-sm hover:bg-muted disabled:opacity-50"
                   >
                     {emp.displayName} ({coverStart}-{coverEnd}h)
                   </button>

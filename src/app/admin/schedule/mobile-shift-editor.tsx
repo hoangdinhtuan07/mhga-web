@@ -125,9 +125,9 @@ export function MobileShiftEditor({
                 setActiveAdd(null);
               }}
               className={cn(
-                "flex h-12 shrink-0 flex-col items-center justify-center rounded-md border px-3 text-xs font-medium",
+                "flex h-12 shrink-0 flex-col items-center justify-center rounded-[var(--radius)] border px-3 text-xs font-medium",
                 selectedDay === day
-                  ? "border-primary bg-primary/10 text-primary"
+                  ? "border-transparent bg-primary text-primary-foreground"
                   : "border-input",
               )}
             >
@@ -137,7 +137,11 @@ export function MobileShiftEditor({
               <span
                 className={cn(
                   "font-normal",
-                  gap > 0 ? "text-destructive" : "text-muted-foreground",
+                  selectedDay === day
+                    ? "text-primary-foreground/80"
+                    : gap > 0
+                      ? "text-destructive"
+                      : "text-muted-foreground",
                 )}
               >
                 {gap > 0 ? `hở ${gap}h` : "đủ"}
@@ -150,7 +154,7 @@ export function MobileShiftEditor({
       {error && (
         <p
           role="alert"
-          className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+          className="rounded-[var(--radius)] bg-[var(--bg-danger)] p-4 text-sm text-[var(--text-danger)]"
         >
           {error}
         </p>
@@ -165,7 +169,7 @@ export function MobileShiftEditor({
           const gap = gapHoursByStoreDay[store.id]?.[selectedDay] ?? 0;
 
           return (
-            <div key={store.id} className="space-y-2 rounded-lg border p-3">
+            <div key={store.id} className="space-y-2 rounded-[var(--radius)] border p-3">
               <div className="flex items-center justify-between">
                 <p className="font-medium">{store.name}</p>
                 <span
@@ -207,7 +211,7 @@ export function MobileShiftEditor({
                                 : { storeId: store.id, sliceIndex: segment.startIndex, start: slice.start, end },
                             )
                           }
-                          className="flex h-11 w-full items-center justify-between rounded-md border border-destructive/40 bg-destructive/10 px-3 text-sm text-destructive"
+                          className="flex h-11 w-full items-center justify-between rounded-[var(--radius)] bg-[var(--bg-danger)] px-3 text-sm text-[var(--text-danger)]"
                         >
                           <span>
                             {slice.start}-{end}h
@@ -215,7 +219,7 @@ export function MobileShiftEditor({
                           <span>Trống</span>
                         </button>
                         {isActive && gapSuggestions && (
-                          <div className="space-y-2 rounded-md border p-3">
+                          <div className="space-y-2 rounded-[var(--radius)] border p-3">
                             {gapSuggestions.fullyAvailable.length === 0 &&
                               gapSuggestions.partial.length === 0 && (
                                 <p className="text-sm text-muted-foreground">
@@ -234,7 +238,7 @@ export function MobileShiftEditor({
                                       type="button"
                                       disabled={isPending}
                                       onClick={() => handlePatchGap(store.id, emp.id, slice.start, end)}
-                                      className="h-9 rounded-md border px-3 text-sm disabled:opacity-50"
+                                      className="h-9 rounded-full border px-3 text-sm disabled:opacity-50"
                                     >
                                       {emp.displayName}
                                     </button>
@@ -254,7 +258,7 @@ export function MobileShiftEditor({
                                       type="button"
                                       disabled={isPending}
                                       onClick={() => handlePatchGap(store.id, emp.id, coverStart, coverEnd)}
-                                      className="h-9 rounded-md border px-3 text-sm disabled:opacity-50"
+                                      className="h-9 rounded-full border px-3 text-sm disabled:opacity-50"
                                     >
                                       {emp.displayName} ({coverStart}-{coverEnd}h)
                                     </button>
@@ -271,7 +275,7 @@ export function MobileShiftEditor({
                   return (
                     <div
                       key={segment.startIndex}
-                      className="flex h-11 w-full items-center justify-between rounded-md border bg-primary/10 px-3 text-sm"
+                      className="flex h-11 w-full items-center justify-between rounded-[var(--radius)] bg-[var(--bg-success)] px-3 text-sm text-[var(--text-success)]"
                     >
                       <span>
                         {slice.start}-{end}h
@@ -317,13 +321,13 @@ export function MobileShiftEditor({
                     activeAdd?.storeId === store.id ? null : { storeId: store.id, shiftId: storeShifts[0]?.id ?? 0 },
                   )
                 }
-                className="flex h-11 w-full items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground"
+                className="flex h-11 w-full items-center justify-center rounded-[var(--radius)] border border-dashed text-sm text-muted-foreground"
               >
                 + Thêm người vào ca
               </button>
 
               {activeAdd?.storeId === store.id && (
-                <div className="space-y-2 rounded-md border p-3">
+                <div className="space-y-2 rounded-[var(--radius)] border p-3">
                   <div className="flex flex-wrap gap-1">
                     {storeShifts.map((shift) => (
                       <button
@@ -331,7 +335,7 @@ export function MobileShiftEditor({
                         type="button"
                         onClick={() => setActiveAdd({ storeId: store.id, shiftId: shift.id })}
                         className={cn(
-                          "h-9 rounded-md border px-2 text-xs",
+                          "h-9 rounded-full border px-2 text-xs",
                           activeAdd.shiftId === shift.id && "border-primary bg-primary/10 text-primary",
                         )}
                       >
@@ -371,7 +375,7 @@ export function MobileShiftEditor({
                             type="button"
                             disabled={isPending}
                             onClick={() => handleAssign(store.id, shift.id, emp.id)}
-                            className="h-9 rounded-md border px-3 text-sm disabled:opacity-50"
+                            className="h-9 rounded-full border px-3 text-sm disabled:opacity-50"
                           >
                             {emp.displayName}
                           </button>
