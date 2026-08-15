@@ -64,26 +64,26 @@
   --text-secondary: #57534e; /* chữ phụ, mô tả */
   --text-muted: #a8a29e; /* chữ mờ, placeholder, nhãn giờ */
   --border: #e7e5e4; /* viền nhạt */
-  --border-strong: #a8a29e; /* viền đậm ngăn cách cửa hàng */
+  --border-strong: #78716c; /* viền đậm ngăn cách cửa hàng */
   --border-accent: #93c5fd; /* viền chip do admin vá tay */
 
   /* trạng thái ô lịch */
-  --bg-success: #dcfce7; /* ô XANH: đã có người */
-  --text-success: #166534;
-  --bg-danger: #fee2e2; /* ô ĐỎ: còn trống */
-  --text-danger: #991b1b;
-  --bg-warning: #fef3c7; /* ô VÀNG: cảnh báo */
+  --bg-success: #c9ecd0; /* ô XANH: đã có người */
+  --text-success: #1a7f37;
+  --bg-danger: #f8d4d8; /* ô ĐỎ: còn trống */
+  --text-danger: #9f1239;
+  --bg-warning: #fbeccb; /* ô VÀNG: cảnh báo */
   --text-warning: #92400e;
-  --bg-accent: #dbeafe; /* ô XANH DƯƠNG: ca của chính mình */
-  --text-accent: #1e40af;
+  --bg-accent: #d5dffb; /* ô XANH DƯƠNG: ca của chính mình */
+  --text-accent: #3730a3;
 
   /* nút chính */
   --fill-primary: #1c1917;
   --on-primary: #fafaf9;
 
   /* header bảng */
-  --bg-header: #ede9fe;
-  --text-header: #5b21b6;
+  --bg-header: #e5e1fb;
+  --text-header: #4c3bb8;
 
   /* ánh xạ sang token shadcn có sẵn (Button/Input/Table/Dialog... đều dùng
      các biến này) để toàn bộ UI component tự động theo đúng bảng màu trên,

@@ -139,17 +139,23 @@ export function RegistrationGrid({
         <table className="w-full border-collapse text-[11px]">
           <thead>
             <tr className={TABLE_HEADER_ROW}>
-              <th className={cn("w-28 p-2 text-left", TABLE_HEADER_CELL)}>
+              <th
+                className={cn(
+                  "w-28 p-[9px] text-left text-[11px] font-semibold",
+                  TABLE_HEADER_CELL,
+                )}
+              >
                 Giờ
               </th>
               {weekDays.map((day, dayIndex) => (
                 <th
                   key={day}
                   className={cn(
-                    "p-2 text-center",
+                    "p-[9px] text-center text-[11px] font-semibold",
                     TABLE_HEADER_CELL,
                     TABLE_HEADER_DAY,
-                    !dayValidity[day] && "text-[var(--text-danger)]",
+                    !dayValidity[day] &&
+                      "bg-[var(--bg-danger)] text-[var(--text-danger)]",
                   )}
                 >
                   <div>{WEEKDAY_LABELS[dayIndex]}</div>
@@ -163,7 +169,7 @@ export function RegistrationGrid({
           <tbody>
             {SLOTS.map((slot, slotIndex) => (
               <tr key={slot.label} className="border-t border-t-[var(--border)]">
-                <td className="bg-white p-2 font-semibold text-[var(--text-secondary)] whitespace-nowrap">
+                <td className="bg-transparent p-2 text-[11.5px] font-semibold text-[#44403c] whitespace-nowrap">
                   {slot.label}
                 </td>
                 {weekDays.map((day) => {
@@ -172,17 +178,17 @@ export function RegistrationGrid({
                   return (
                     <td
                       key={day}
-                      className="border-l-[1.5px] border-l-[var(--border)] p-0.5"
+                      className="border-l border-l-[var(--border)] px-[6px] py-[5px]"
                     >
                       <button
                         type="button"
                         disabled={locked}
                         onClick={() => toggleSlot(day, slotIndex)}
                         className={cn(
-                          "h-[30px] w-full text-sm transition-colors",
+                          "h-[38px] w-full rounded-[8px] text-[13px] transition-colors",
                           isSelected && dayOk && "bg-[var(--bg-success)] text-[var(--text-success)]",
                           isSelected && !dayOk && "bg-[var(--bg-danger)] text-[var(--text-danger)]",
-                          !isSelected && "bg-white text-[var(--text-muted)]",
+                          !isSelected && "bg-transparent text-[var(--text-muted)]",
                           locked && "cursor-not-allowed opacity-70",
                         )}
                       >
@@ -194,14 +200,14 @@ export function RegistrationGrid({
               </tr>
             ))}
             <tr>
-              <td className="border-t-2 border-t-[var(--border-strong)] bg-white p-2 text-sm font-bold text-[var(--text-muted)]">
+              <td className="border-t-2 border-t-[var(--border-strong)] bg-transparent p-[9px] text-[11.5px] font-bold text-[var(--text-muted)]">
                 Có thể làm
               </td>
               {weekDays.map((day) => (
                 <td
                   key={day}
                   className={cn(
-                    "border-t-2 border-t-[var(--border-strong)] border-l-[1.5px] border-l-[var(--border)] p-1.5 text-center text-sm font-bold",
+                    "border-t-2 border-t-[var(--border-strong)] border-l border-l-[var(--border)] p-[9px] text-center text-[11.5px] font-bold",
                     dayValidity[day]
                       ? "text-[var(--text-accent)]"
                       : "text-[var(--text-danger)]",

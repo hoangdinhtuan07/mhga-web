@@ -22,22 +22,22 @@
   --border-accent: #93c5fd;   /* viền chip do admin vá tay */
 
   /* trạng thái ô lịch */
-  --bg-success:    #dcfce7;   /* ô XANH: đã có người */
-  --text-success:  #166534;
-  --bg-danger:     #fee2e2;   /* ô ĐỎ: còn trống */
-  --text-danger:   #991b1b;
-  --bg-warning:    #fef3c7;   /* ô VÀNG: cảnh báo */
+  --bg-success:    #c9ecd0;   /* ô XANH: đã có người */
+  --text-success:  #1a7f37;
+  --bg-danger:     #f8d4d8;   /* ô ĐỎ: còn trống */
+  --text-danger:   #9f1239;
+  --bg-warning:    #fbeccb;   /* ô VÀNG: cảnh báo */
   --text-warning:  #92400e;
-  --bg-accent:     #dbeafe;   /* ô XANH DƯƠNG: ca của chính mình */
-  --text-accent:   #1e40af;
+  --bg-accent:     #d5dffb;   /* ô XANH DƯƠNG: ca của chính mình */
+  --text-accent:   #3730a3;
 
   /* nút chính */
   --fill-primary:  #1c1917;
   --on-primary:    #fafaf9;
 
   /* header bảng */
-  --bg-header:     #ede9fe;
-  --text-header:   #5b21b6;
+  --bg-header:     #e5e1fb;
+  --text-header:   #4c3bb8;
 
   --radius: 10px;
 }
@@ -47,6 +47,12 @@
    - Font: SANS-SERIF cho toàn bộ. KHÔNG dùng serif ở bất kỳ đâu.
    - Không dùng chữ in nghiêng cho nội dung.
    - Nút bấm trên điện thoại: cao tối thiểu 44px.
+
+   NGUYÊN TẮC MÀU QUAN TRỌNG NHẤT:
+   Ô CHƯA CHỌN / KHÔNG CÓ DỮ LIỆU phải để TRONG SUỐT (không tô nền).
+   Chỉ ô có dữ liệu mới được tô màu. Nếu tô nền xám cho ô trống,
+   cả bảng sẽ trông bị lấp kín và ô có dữ liệu chìm nghỉm.
+   surface-1 CHỈ dùng cho thẻ, khối, ô nhập — KHÔNG dùng cho ô bảng trống.
    ============================================================ */
 *{box-sizing:border-box}
 body{
@@ -134,17 +140,22 @@ tr.store-row   td{border-top:1px solid var(--border)}
 
 /* ---------- LƯỚI ĐĂNG KÝ CỦA NHÂN VIÊN ---------- */
 table.reg{border-collapse:collapse;font-size:11px;width:100%;table-layout:fixed}
-table.reg th{padding:6px 4px;background:var(--bg-header);color:var(--text-header);font-weight:500;font-size:10px}
-table.reg td.slot{padding:5px 4px;color:var(--text-secondary);background:var(--surface-1);white-space:nowrap;border-top:1px solid var(--border)}
-table.reg td.pick{padding:2px;border-top:1px solid var(--border);border-left:1.5px solid var(--border)}
+table.reg th{padding:9px 4px;background:var(--bg-header);color:var(--text-header);font-weight:600;font-size:11px}
+/* header của ngày KHÔNG hợp lệ đổi sang nền đỏ */
+table.reg th.invalid{background:var(--bg-danger);color:var(--text-danger)}
+/* cột "Giờ" của lưới đăng ký: nền TRONG SUỐT, không dùng surface-1 */
+table.reg td.slot{padding:8px;color:#44403c;background:transparent;white-space:nowrap;border-top:1px solid var(--border);font-size:11.5px}
+table.reg td.pick{padding:5px 6px;border-top:1px solid var(--border);border-left:1px solid var(--border)}
+/* QUAN TRỌNG: ô CHƯA CHỌN phải TRONG SUỐT, tuyệt đối không tô nền xám.
+   Tô xám làm cả bảng trông bị lấp kín và ô đã chọn chìm nghỉm. */
 button.slotbtn{
-  width:100%;height:30px;border:none;padding:0;font-size:11px;
-  background:var(--surface-1);color:var(--text-muted);cursor:pointer;font-family:inherit;
+  width:100%;height:38px;border:none;border-radius:8px;padding:0;font-size:13px;
+  background:transparent;color:transparent;cursor:pointer;font-family:inherit;
 }
 button.slotbtn.on     {background:var(--bg-success);color:var(--text-success)}
 button.slotbtn.invalid{background:var(--bg-danger); color:var(--text-danger)}
-tfoot td.sumlabel{padding:6px 4px;font-size:10px;color:var(--text-muted);border-top:2px solid var(--border-strong);background:var(--surface-1)}
-tfoot td.sum{padding:6px 3px;border-top:2px solid var(--border-strong);border-left:1.5px solid var(--border);font-size:10px;text-align:center;font-weight:600;color:var(--text-accent)}
+tfoot td.sumlabel{padding:9px 8px;font-size:11px;color:var(--text-muted);border-top:2px solid #78716c;background:transparent}
+tfoot td.sum{padding:9px 4px;border-top:2px solid #78716c;border-left:1px solid var(--border);font-size:11.5px;text-align:center;font-weight:700;color:var(--text-accent)}
 tfoot td.sum.bad{color:var(--text-danger)}
 tfoot td.sum.none{color:var(--text-muted);font-weight:400}
 
@@ -378,7 +389,7 @@ button.primary:disabled{background:var(--surface-1);color:var(--text-muted);curs
   <colgroup><col style="width:62px"><col><col><col><col><col><col><col></colgroup>
   <thead>
     <tr><th style="text-align:left">Giờ</th>
-      <th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th></tr>
+      <th>T2</th><th class="invalid">T3</th><th class="invalid">T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th></tr>
   </thead>
   <tbody>
     <tr>
