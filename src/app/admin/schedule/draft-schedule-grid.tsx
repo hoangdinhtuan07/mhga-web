@@ -18,13 +18,16 @@ import type { StoreDef } from "./assignment-table";
 import type { EmployeeRegistration } from "./registration-overview-table";
 import { editDraftCell, publishSchedule } from "./actions";
 import {
-  HOUR_CELL,
-  STORE_CELL,
-  STORE_ROW,
+  SCHED_CELL_BASE,
+  SCHED_CELL_EMPTY,
+  SCHED_CELL_FILLED,
+  SCHED_HEADER_CELL,
+  SCHED_HEADER_ROW,
+  SCHED_HOUR_CELL,
+  SCHED_STORE_CELL,
+  SCHED_STORE_ROW,
   STORE_START_ROW,
-  TABLE_HEADER_CELL,
   TABLE_HEADER_DAY,
-  TABLE_HEADER_ROW,
 } from "@/lib/schedule/table-styles";
 
 const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
@@ -182,13 +185,13 @@ export function DraftScheduleGrid({
       <div className="hidden overflow-x-auto rounded-[var(--radius)] border border-[var(--border)] md:block">
         <table className="w-full border-collapse text-[11px]">
           <thead>
-            <tr className={TABLE_HEADER_ROW}>
-              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Cửa hàng</th>
-              <th className={cn("p-2 text-center", TABLE_HEADER_CELL)}>Giờ</th>
+            <tr className={SCHED_HEADER_ROW}>
+              <th className={cn("text-left", SCHED_HEADER_CELL)}>Cửa hàng</th>
+              <th className={cn("text-center", SCHED_HEADER_CELL)}>Giờ</th>
               {weekDays.map((day, i) => (
                 <th
                   key={day}
-                  className={cn("p-2 text-center", TABLE_HEADER_CELL, TABLE_HEADER_DAY)}
+                  className={cn("text-center", SCHED_HEADER_CELL, TABLE_HEADER_DAY)}
                 >
                   {WEEKDAY_LABELS[i]}
                 </th>
@@ -205,14 +208,14 @@ export function DraftScheduleGrid({
                   {slices.map((slice, sliceIndex) => (
                     <tr
                       key={`${slice.start}-${slice.end}`}
-                      className={sliceIndex === 0 ? STORE_START_ROW : STORE_ROW}
+                      className={sliceIndex === 0 ? STORE_START_ROW : SCHED_STORE_ROW}
                     >
                       {sliceIndex === 0 && (
-                        <td rowSpan={slices.length} className={cn("p-2 align-middle", STORE_CELL)}>
+                        <td rowSpan={slices.length} className={SCHED_STORE_CELL}>
                           {store.name}
                         </td>
                       )}
-                      <td className={cn("p-2 whitespace-nowrap", HOUR_CELL)}>
+                      <td className={cn("whitespace-nowrap", SCHED_HOUR_CELL)}>
                         {slice.start}-{slice.end}h
                       </td>
                       {weekDays.map((day) => {
@@ -236,9 +239,10 @@ export function DraftScheduleGrid({
                             key={day}
                             rowSpan={segment.sliceCount}
                             className={cn(
-                              "border-l-[1.5px] border-l-[var(--border)] p-1.5 align-top",
-                              isRed && !isEditingThis && "bg-[var(--bg-danger)]",
-                              !isRed && "bg-[var(--bg-success)]",
+                              "relative",
+                              SCHED_CELL_BASE,
+                              isRed && !isEditingThis && SCHED_CELL_EMPTY,
+                              !isRed && SCHED_CELL_FILLED,
                             )}
                           >
                             {isEditingThis ? (
@@ -250,7 +254,7 @@ export function DraftScheduleGrid({
                                 onKeyDown={handleKeyDown}
                                 onBlur={commitEdit}
                                 disabled={isPending}
-                                className="h-8 w-full min-w-[7rem] rounded border border-[var(--border)] bg-[var(--surface-2)] px-1 text-[11px] text-[var(--text-primary)] outline-none focus:border-[var(--text-accent)]"
+                                className="h-8 w-full min-w-[7rem] border border-[var(--border)] bg-[var(--surface-2)] px-1 text-[11px] text-[var(--text-primary)] outline-none focus:border-[var(--text-accent)]"
                               />
                             ) : (
                               <button
@@ -264,15 +268,10 @@ export function DraftScheduleGrid({
                                     segment.people.map((p) => p.displayName),
                                   )
                                 }
-                                className={cn(
-                                  "w-full rounded px-1 py-1 text-center hover:underline",
-                                  isRed
-                                    ? "text-[var(--text-danger)]"
-                                    : "text-[var(--text-success)]",
-                                )}
+                                className="absolute inset-0 h-full w-full"
                               >
                                 {isRed
-                                  ? "+ nhập tên"
+                                  ? null
                                   : segment.people.map((p) => p.displayName).join(", ")}
                               </button>
                             )}

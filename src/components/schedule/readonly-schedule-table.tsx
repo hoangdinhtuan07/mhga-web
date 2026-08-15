@@ -3,17 +3,19 @@ import { cn } from "@/lib/utils";
 import { buildStoreGrid } from "@/lib/schedule/grid";
 import type { ScheduleAssignment } from "@/lib/schedule/assignment";
 import {
-  CELL_BASE,
-  CELL_EMPTY,
   CELL_FILLED,
   CELL_MINE,
-  HOUR_CELL,
-  STORE_CELL,
-  STORE_ROW,
+  SCHED_CELL_BASE,
+  SCHED_CELL_EMPTY,
+  SCHED_CELL_FILLED,
+  SCHED_CELL_MINE,
+  SCHED_HEADER_CELL,
+  SCHED_HEADER_ROW,
+  SCHED_HOUR_CELL,
+  SCHED_STORE_CELL,
+  SCHED_STORE_ROW,
   STORE_START_ROW,
-  TABLE_HEADER_CELL,
   TABLE_HEADER_DAY,
-  TABLE_HEADER_ROW,
 } from "@/lib/schedule/table-styles";
 
 const WEEKDAY_LABELS = [
@@ -63,13 +65,13 @@ export function ReadonlyScheduleTable({
             ))}
           </colgroup>
           <thead>
-            <tr className={TABLE_HEADER_ROW}>
-              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Cửa hàng</th>
-              <th className={cn("p-2 text-center", TABLE_HEADER_CELL)}>Giờ</th>
+            <tr className={SCHED_HEADER_ROW}>
+              <th className={cn("text-left", SCHED_HEADER_CELL)}>Cửa hàng</th>
+              <th className={cn("text-center", SCHED_HEADER_CELL)}>Giờ</th>
               {weekDays.map((day, i) => (
                 <th
                   key={day}
-                  className={cn("p-2 text-center", TABLE_HEADER_CELL, TABLE_HEADER_DAY)}
+                  className={cn("text-center", SCHED_HEADER_CELL, TABLE_HEADER_DAY)}
                 >
                   {WEEKDAY_LABELS[i].replace("Thứ ", "T").replace("Chủ nhật", "CN")}
                 </th>
@@ -86,14 +88,14 @@ export function ReadonlyScheduleTable({
                   {slices.map((slice, sliceIndex) => (
                     <tr
                       key={`${slice.start}-${slice.end}`}
-                      className={sliceIndex === 0 ? STORE_START_ROW : STORE_ROW}
+                      className={sliceIndex === 0 ? STORE_START_ROW : SCHED_STORE_ROW}
                     >
                       {sliceIndex === 0 && (
-                        <td rowSpan={slices.length} className={cn("p-2 align-middle", STORE_CELL)}>
+                        <td rowSpan={slices.length} className={SCHED_STORE_CELL}>
                           {store.name}
                         </td>
                       )}
-                      <td className={cn("p-2 whitespace-nowrap", HOUR_CELL)}>
+                      <td className={cn("whitespace-nowrap", SCHED_HOUR_CELL)}>
                         {slice.start}-{slice.end}h
                       </td>
                       {weekDays.map((day) => {
@@ -108,11 +110,10 @@ export function ReadonlyScheduleTable({
                             key={day}
                             rowSpan={segment.sliceCount}
                             className={cn(
-                              "p-2 text-center align-middle",
-                              CELL_BASE,
-                              isEmpty && CELL_EMPTY,
-                              !isEmpty && !hasMe && CELL_FILLED,
-                              hasMe && CELL_MINE,
+                              SCHED_CELL_BASE,
+                              isEmpty && SCHED_CELL_EMPTY,
+                              !isEmpty && !hasMe && SCHED_CELL_FILLED,
+                              hasMe && SCHED_CELL_MINE,
                             )}
                           >
                             {segment.people.map((p) => p.displayName).join(", ")}

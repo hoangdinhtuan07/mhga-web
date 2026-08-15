@@ -12,13 +12,16 @@ import type { EmployeeRegistration } from "./registration-overview-table";
 import type { StoreDef } from "./assignment-table";
 import { patchGap, unassignShift } from "./actions";
 import {
-  HOUR_CELL,
-  STORE_CELL,
-  STORE_ROW,
+  SCHED_CELL_BASE,
+  SCHED_CELL_EMPTY,
+  SCHED_CELL_FILLED,
+  SCHED_HEADER_CELL,
+  SCHED_HEADER_ROW,
+  SCHED_HOUR_CELL,
+  SCHED_STORE_CELL,
+  SCHED_STORE_ROW,
   STORE_START_ROW,
-  TABLE_HEADER_CELL,
   TABLE_HEADER_DAY,
-  TABLE_HEADER_ROW,
 } from "@/lib/schedule/table-styles";
 
 const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
@@ -30,32 +33,6 @@ type SelectedGap = {
   start: number;
   end: number;
 };
-
-function GapCellLabel({
-  day,
-  slice,
-  employees,
-  assignments,
-}: {
-  day: string;
-  slice: { start: number; end: number };
-  employees: EmployeeRegistration[];
-  assignments: ScheduleAssignment[];
-}) {
-  const { fullyAvailable, partial } = getGapSuggestions(
-    day,
-    slice,
-    employees,
-    assignments,
-  );
-  if (fullyAvailable.length > 0) {
-    return <span>{fullyAvailable.length} rảnh</span>;
-  }
-  if (partial.length > 0) {
-    return <span>{partial.length} vá</span>;
-  }
-  return <span>trống</span>;
-}
 
 function PersonWithRemove({
   person,
@@ -176,13 +153,13 @@ export function ScheduleReview({
       <div className="overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
         <table className="w-full border-collapse text-[11px]">
           <thead>
-            <tr className={TABLE_HEADER_ROW}>
-              <th className={cn("p-2 text-left", TABLE_HEADER_CELL)}>Cửa hàng</th>
-              <th className={cn("p-2 text-center", TABLE_HEADER_CELL)}>Giờ</th>
+            <tr className={SCHED_HEADER_ROW}>
+              <th className={cn("text-left", SCHED_HEADER_CELL)}>Cửa hàng</th>
+              <th className={cn("text-center", SCHED_HEADER_CELL)}>Giờ</th>
               {weekDays.map((day, i) => (
                 <th
                   key={day}
-                  className={cn("p-2 text-center", TABLE_HEADER_CELL, TABLE_HEADER_DAY)}
+                  className={cn("text-center", SCHED_HEADER_CELL, TABLE_HEADER_DAY)}
                 >
                   {WEEKDAY_LABELS[i]}
                 </th>
@@ -204,14 +181,14 @@ export function ScheduleReview({
                   {slices.map((slice, sliceIndex) => (
                     <tr
                       key={`${slice.start}-${slice.end}`}
-                      className={sliceIndex === 0 ? STORE_START_ROW : STORE_ROW}
+                      className={sliceIndex === 0 ? STORE_START_ROW : SCHED_STORE_ROW}
                     >
                       {sliceIndex === 0 && (
-                        <td rowSpan={slices.length} className={cn("p-2 align-middle", STORE_CELL)}>
+                        <td rowSpan={slices.length} className={SCHED_STORE_CELL}>
                           {store.name}
                         </td>
                       )}
-                      <td className={cn("p-2 whitespace-nowrap", HOUR_CELL)}>
+                      <td className={cn("whitespace-nowrap", SCHED_HOUR_CELL)}>
                         {slice.start}-{slice.end}h
                       </td>
                       {weekDays.map((day) => {
@@ -232,16 +209,18 @@ export function ScheduleReview({
                             key={day}
                             rowSpan={segment.sliceCount}
                             className={cn(
-                              "border-l-[1.5px] border-l-[var(--border)] p-2 text-center",
-                              isRed && "bg-[var(--bg-danger)]",
-                              !isRed && "bg-[var(--bg-success)]",
+                              "relative",
+                              SCHED_CELL_BASE,
+                              isRed && SCHED_CELL_EMPTY,
+                              !isRed && SCHED_CELL_FILLED,
                               isSelected && "ring-2 ring-inset ring-[var(--text-accent)]",
                             )}
                           >
                             {isRed ? (
                               <button
                                 type="button"
-                                className="w-full rounded px-1 py-1 text-center text-[var(--text-danger)] hover:underline"
+                                className="absolute inset-0 h-full w-full"
+                                aria-label="Vá tay ca trống"
                                 onClick={() =>
                                   setSelectedGap({
                                     storeId: store.id,
@@ -251,16 +230,9 @@ export function ScheduleReview({
                                     end: slice.end,
                                   })
                                 }
-                              >
-                                <GapCellLabel
-                                  day={day}
-                                  slice={slice}
-                                  employees={employees}
-                                  assignments={assignments}
-                                />
-                              </button>
+                              />
                             ) : (
-                              <div className="flex flex-wrap justify-center gap-x-1 text-[var(--text-success)]">
+                              <div className="flex flex-wrap justify-center gap-x-1">
                                 {segment.people.map((person, idx) => {
                                   const id = findAssignmentId(
                                     person.id,

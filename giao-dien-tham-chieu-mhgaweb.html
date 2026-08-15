@@ -36,7 +36,7 @@
   --on-primary:    #fafaf9;
 
   /* header bảng */
-  --bg-header:     #e5e1fb;
+  --bg-header:     #ded9fb;
   --text-header:   #4c3bb8;
 
   --radius: 10px;
@@ -100,31 +100,40 @@ p.sub{font-size:11.5px;color:var(--text-secondary);margin:0 0 12px}
 .mine .val{font-size:11.5px;color:var(--text-accent)}
 .mine .off{font-size:11.5px;color:var(--text-muted);font-weight:600;letter-spacing:.5px}
 
-/* ---------- BẢNG LỊCH (dùng ở trang chủ, Bước 3, Bước 4) ---------- */
-table.sched{border-collapse:collapse;font-size:11px;width:100%;table-layout:fixed}
+/* ---------- BẢNG LỊCH (dùng ở trang chủ, Bước 3, Bước 4) ----------
+   ⚠ KIỂU HIỂN THỊ CỦA BẢNG NÀY NGƯỢC VỚI LƯỚI ĐĂNG KÝ:
+   - Màu LẤP KÍN toàn bộ ô, KHÔNG bo góc, KHÔNG có khoảng trắng bao quanh.
+   - Các ô chỉ ngăn nhau bằng ĐƯỜNG KẺ TRẮNG 1px.
+   - Ô trống vẫn TÔ MÀU ĐỎ (khác lưới đăng ký — ở đó ô trống để trong suốt).
+   Lý do: bảng lịch cần đọc theo hàng ngang liền mạch. Bo góc + khoảng trắng
+   làm các ca liền nhau trông rời rạc, mắt khó lần theo dòng.
+   ------------------------------------------------------------------ */
+table.sched{border-collapse:collapse;font-size:12px;width:100%;table-layout:fixed}
 table.sched th{
-  padding:6px 4px;background:var(--bg-header);color:var(--text-header);
-  font-weight:500;font-size:10px;
+  padding:12px 6px;background:var(--bg-header);color:var(--text-header);
+  font-weight:600;font-size:12px;
 }
-table.sched th.day{border-left:1.5px solid var(--border)}
-table.sched td{font-size:10px}
-/* cột tên cửa hàng và cột giờ */
+/* cột tên cửa hàng và cột giờ: nền TRẮNG, không dùng surface-1 */
 td.store{
-  padding:6px 4px;color:var(--text-primary);font-weight:600;
-  vertical-align:middle;background:var(--surface-1);
+  padding:14px 10px;color:var(--text-primary);font-weight:700;
+  vertical-align:middle;background:#ffffff;
 }
 td.hour{
-  padding:6px 4px;color:var(--text-secondary);background:var(--surface-1);
-  white-space:nowrap;font-size:10px;
+  padding:14px 10px;color:var(--text-secondary);background:#ffffff;
+  white-space:nowrap;font-size:12px;
 }
-/* ô dữ liệu */
-td.cell{padding:6px 4px;text-align:center;vertical-align:middle;border-left:1.5px solid var(--border)}
+/* ô dữ liệu — padding nằm TRONG vùng đã tô màu */
+td.cell{
+  padding:14px 6px;text-align:center;vertical-align:middle;font-size:13px;
+  border:1px solid #ffffff;      /* đường kẻ trắng mảnh */
+  border-radius:0;               /* TUYỆT ĐỐI không bo góc */
+}
 td.cell.filled{background:var(--bg-success);color:var(--text-success)}
-td.cell.empty {background:var(--bg-danger); color:var(--text-danger)}
+td.cell.empty {background:var(--bg-danger)}   /* để trống, không ghi chữ */
 td.cell.mine  {background:var(--bg-accent); color:var(--text-accent);font-weight:700}
-/* đường ngăn cách giữa các cửa hàng: ĐẬM. Giữa các dòng ca: nhạt */
+/* đường ngăn cách giữa các cửa hàng: ĐẬM. Giữa các dòng ca: kẻ trắng */
 tr.store-start td{border-top:2px solid var(--border-strong)}
-tr.store-row   td{border-top:1px solid var(--border)}
+tr.store-row   td{border-top:1px solid #ffffff}
 
 /* ---------- BẢNG GÁN NGƯỜI (chip) ---------- */
 .chipbox{display:flex;flex-wrap:wrap;gap:2px;padding:3px;min-height:18px;border-radius:4px}
