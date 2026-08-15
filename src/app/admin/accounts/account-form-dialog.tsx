@@ -158,7 +158,9 @@ export function AccountFormDialog({
               onValueChange={(value) => setRole(value as "admin" | "staff")}
             >
               <SelectTrigger id="role" className="h-11 w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(value: string) => (value === "admin" ? "Admin" : "Nhân viên")}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="staff">Nhân viên</SelectItem>

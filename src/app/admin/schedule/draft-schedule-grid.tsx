@@ -35,6 +35,11 @@ function cellKey(storeId: number, day: string, start: number, end: number) {
   return `${storeId}|${day}|${start}-${end}`;
 }
 
+function formatDayShort(dateKey: string) {
+  const [, m, d] = dateKey.split("-");
+  return `${d}/${m}`;
+}
+
 export function DraftScheduleGrid({
   weekStart,
   weekLabel,
@@ -56,18 +61,27 @@ export function DraftScheduleGrid({
   const [editing, setEditing] = useState<EditingCell | null>(null);
   const [editValue, setEditValue] = useState("");
   const [skipped, setSkipped] = useState<Record<string, string[]>>({});
+  const [selectedDay, setSelectedDay] = useState(weekDays[0]);
   const [isPending, startTransition] = useTransition();
   const [publishConfirm, setPublishConfirm] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [justPublished, setJustPublished] = useState(false);
 
-  const totalGapHours = stores.reduce((sum, store) => {
-    const perDay = storeDayGapHours(
-      weekDays,
-      assignments.filter((a) => a.storeId === store.id),
-    );
-    return sum + weekDays.reduce((s, day) => s + (perDay[day] ?? 0), 0);
-  }, 0);
+  const gapHoursByStoreDay = Object.fromEntries(
+    stores.map((store) => [
+      store.id,
+      storeDayGapHours(weekDays, assignments.filter((a) => a.storeId === store.id)),
+    ]),
+  ) as Record<number, Record<string, number>>;
+
+  const dayTotalGap = Object.fromEntries(
+    weekDays.map((day) => [
+      day,
+      stores.reduce((sum, store) => sum + (gapHoursByStoreDay[store.id]?.[day] ?? 0), 0),
+    ]),
+  );
+
+  const totalGapHours = weekDays.reduce((sum, day) => sum + (dayTotalGap[day] ?? 0), 0);
 
   function startEdit(storeId: number, day: string, start: number, end: number, names: string[]) {
     setEditing({ storeId, day, start, end });
@@ -164,7 +178,8 @@ export function DraftScheduleGrid({
         ))}
       </datalist>
 
-      <div className="overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
+      {/* Bố cục máy tính */}
+      <div className="hidden overflow-x-auto rounded-[var(--radius)] border border-[var(--border)] md:block">
         <table className="w-full border-collapse text-[11px]">
           <thead>
             <tr className={TABLE_HEADER_ROW}>
@@ -276,6 +291,135 @@ export function DraftScheduleGrid({
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Bố cục điện thoại: chọn ngày rồi bấm từng ô để sửa trực tiếp (mục 9) */}
+      <div className="space-y-3 md:hidden">
+        <div className="flex gap-1 overflow-x-auto pb-1">
+          {weekDays.map((day, i) => {
+            const gap = dayTotalGap[day] ?? 0;
+            return (
+              <button
+                key={day}
+                type="button"
+                onClick={() => setSelectedDay(day)}
+                className={cn(
+                  "flex h-12 shrink-0 flex-col items-center justify-center rounded-[var(--radius)] border px-3 text-xs font-medium",
+                  selectedDay === day
+                    ? "border-transparent bg-[var(--fill-primary)] text-[var(--on-primary)]"
+                    : "border-[var(--border)]",
+                )}
+              >
+                <span>
+                  {WEEKDAY_LABELS[i]} · {formatDayShort(day)}
+                </span>
+                <span
+                  className={cn(
+                    "font-normal",
+                    selectedDay === day
+                      ? "text-[var(--on-primary)] opacity-80"
+                      : gap > 0
+                        ? "text-[var(--text-danger)]"
+                        : "text-[var(--text-muted)]",
+                  )}
+                >
+                  {gap > 0 ? `hở ${gap}h` : "đủ"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="space-y-3">
+          {stores.map((store) => {
+            const storeAssignments = assignments.filter((a) => a.storeId === store.id);
+            const { slices, segmentsByDay } = buildStoreGrid(weekDays, storeAssignments);
+            const segments = segmentsByDay[selectedDay];
+            const gap = gapHoursByStoreDay[store.id]?.[selectedDay] ?? 0;
+
+            return (
+              <div
+                key={store.id}
+                className="space-y-1.5 rounded-[var(--radius)] border border-[var(--border)] p-3"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="font-medium">{store.name}</p>
+                  <span
+                    className={cn(
+                      "text-xs font-medium",
+                      gap > 0 ? "text-[var(--text-danger)]" : "text-[var(--text-muted)]",
+                    )}
+                  >
+                    {gap > 0 ? `thiếu ${gap}h` : "đủ người"}
+                  </span>
+                </div>
+
+                {segments.map((segment) => {
+                  const slice = slices[segment.startIndex];
+                  const end = slices[segment.startIndex + segment.sliceCount - 1].end;
+                  const isRed = segment.people.length === 0;
+                  const isEditingThis =
+                    editing?.storeId === store.id &&
+                    editing.day === selectedDay &&
+                    editing.start === slice.start &&
+                    editing.end === end;
+                  const key = cellKey(store.id, selectedDay, slice.start, end);
+                  const skippedNames = skipped[key] ?? [];
+
+                  return (
+                    <div key={segment.startIndex}>
+                      {isEditingThis ? (
+                        <input
+                          autoFocus
+                          list="draft-employee-names"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={handleKeyDown}
+                          onBlur={commitEdit}
+                          disabled={isPending}
+                          className="h-11 w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-2)] px-3 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--text-accent)]"
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            startEdit(
+                              store.id,
+                              selectedDay,
+                              slice.start,
+                              end,
+                              segment.people.map((p) => p.displayName),
+                            )
+                          }
+                          className={cn(
+                            "flex h-11 w-full items-center justify-between rounded-[var(--radius)] px-3 text-sm",
+                            isRed
+                              ? "bg-[var(--bg-danger)] text-[var(--text-danger)]"
+                              : "bg-[var(--bg-success)] text-[var(--text-success)]",
+                          )}
+                        >
+                          <span>
+                            {slice.start}-{end}h
+                          </span>
+                          <span>
+                            {isRed
+                              ? "+ nhập tên"
+                              : segment.people.map((p) => p.displayName).join(", ")}
+                          </span>
+                        </button>
+                      )}
+                      {skippedNames.length > 0 && (
+                        <p className="mt-1 text-[11px] text-[var(--text-danger)]">
+                          Không có tài khoản tên: {skippedNames.join(", ")} — đã bỏ qua
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {publishError && (

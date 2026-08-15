@@ -14,7 +14,7 @@ export type HomeMenuItem = {
 // border, icon+chữ text-muted, kèm "Sắp có".
 export function HomeMenu({ items }: { items: HomeMenuItem[] }) {
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-2">
       {items.map((item) => {
         const Icon = item.locked ? Lock : item.icon;
         const content = (
